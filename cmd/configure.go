@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/rs/zerolog/log"
 )
 
@@ -25,8 +24,6 @@ func (c *ConfigureCmd) Run() error {
 	if err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
-
-	spew.Dump(cfg)
 
 	if err := configureEnv(cfg, envPath); err != nil {
 		return fmt.Errorf("failed to configure environment: %w", err)

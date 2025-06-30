@@ -62,27 +62,6 @@ func main() {
 
 	log.Logger = zerolog.New(writer).Level(logLevel).With().Timestamp().Logger()
 
-	// tmpl, err := workbench.ConfigTemplates.ReadFile("config/backbeat/config.json")
-	// if err != nil {
-	// 	log.Fatal().Err(err).Msg("Failed to read embedded config template")
-	// }
-
-	// fmt.Println(string(tmpl))
-
-	// ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-	// defer cancel()
-
-	// <-ctx.Done()
-
 	err := cmd.Run()
 	cmd.FatalIfErrorf(err)
-
-	// cfg, err := LoadConfig("")
-	// if err != nil {
-	// 	log.Fatal().Err(err).Msg("Failed to load config")
-	// }
-
-	// fmt.Printf("%+v\n", cfg)
-
-	log.Info().Msg("Exiting s3c-workbench")
 }

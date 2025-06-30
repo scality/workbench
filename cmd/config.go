@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"dario.cat/mergo"
-	"github.com/davecgh/go-spew/spew"
 	"gopkg.in/yaml.v3"
 )
 
@@ -196,8 +195,6 @@ func LoadConfig(path string) (Config, error) {
 	if err := yaml.Unmarshal(data, &fileCfg); err != nil {
 		return cfg, fmt.Errorf("failed to parse config file: %w", err)
 	}
-
-	spew.Dump(fileCfg)
 
 	// Merge the configs, only overriding non-empty fields
 	if err := mergo.Merge(&cfg, fileCfg, mergo.WithOverride); err != nil {

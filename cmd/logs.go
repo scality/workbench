@@ -9,8 +9,6 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 type LogsCmd struct {
@@ -28,8 +26,6 @@ func (c *LogsCmd) Run() error {
 	if err != nil {
 		return err
 	}
-
-	spew.Dump(cfg)
 
 	args := []string{"logs"}
 

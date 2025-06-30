@@ -40,8 +40,6 @@ func (c *UpCmd) Run() error {
 		return err
 	}
 
-	// spew.Dump(cfg)
-
 	if created || !c.NoConfigure {
 		if err := configureEnv(cfg, envPath); err != nil {
 			return fmt.Errorf("failed to configure environment: %w", err)
