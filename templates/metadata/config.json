@@ -1,0 +1,15 @@
+{
+    "raftSessions": {{ .RaftSessions }},
+    "raftMembers": 5,
+    "bucketdCount": 1,
+    "bucketdWorkers": 1,
+    "basePorts": {
+        "bucketd": {{ .BasePorts.Bucketd }},
+        "repd": {{ .BasePorts.Repd }},
+        "repdAdmin": {{ .BasePorts.RepdAdmin }}
+    },
+    "logLevel": "{{ .LogLevel }}",
+    "env": {
+        "METADATA_NEW_BUCKETS_VFORMAT": "{{ .VFormat }}"
+    }
+}

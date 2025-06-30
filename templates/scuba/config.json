@@ -1,0 +1,65 @@
+{
+    "env": "test",
+    "log": {
+        "logLevel": "info",
+        "dumpLevel": "info"
+    },
+    "queryServer": {
+        "enable": false,
+        "port": 18100,
+        "listenOn": "127.0.0.1",
+        "retryDelayMs": 1000,
+        "maxRetryDelayMs": 1000,
+        "validator": true,
+        "maxRetryCount": 10
+    },
+    "ingestDaemon": {
+        "enable": false,
+        "maxCheckpointWriteIntervalMs": 1000,
+        "maxInMemEvents": 1000,
+        "cacheHighWatermark": 10000,
+        "cacheLowWatermark": 5000,
+        "serviceNames": { "s3": "s3" },
+        "logId": "0"
+    },
+    "monitoring": {
+        "enable": true,
+        "port": 8102
+    },
+    "readerBackend": {
+        "type": "scality",
+        "host": "127.0.0.1",
+        "port": 9990,
+        "refreshPeriodMs": 5000,
+        "retryDelayMs": 1000,
+        "maxRetryDelayMs": 30000,
+        "maxRetryCount": 10,
+        "maxRecordsPerRequest": 1000
+    },
+    "storageBackend": {
+        "type": "file",
+        "host": "127.0.0.1",
+        "port": 19990,
+        "metadataFormatV1": false
+    },
+    "serviceUser": {
+        "arn": "arn:aws:iam::000000000000:user/scality-internal/service-scuba-user",
+        "enable": false
+    },
+    "repair": {
+        "enableAutoRepair": true,
+        "maxPagesBeforeSave": 100,
+        "maxRecordsPerRequest": 10,
+        "maxRetryDelayMs": 1000,
+        "maxRetryCount": 10
+    },
+    "downsampleDaemon": {
+        "enable": false,
+        "maxRecordsPerRequest": 10,
+        "retention": {
+            "days": 31,
+            "months": 12,
+            "years": 5
+        }
+    }
+}

@@ -1,0 +1,34 @@
+FROM alpine:3.22
+
+ARG KAFKA_VERSION=3.4.0
+ARG SCALA_VERSION=2.13
+ENV KAFKA_HOME=/opt/kafka_${SCALA_VERSION}-${KAFKA_VERSION}
+ENV PATH="$PATH:$KAFKA_HOME/bin"
+
+RUN apk add --no-cache \
+    bash \
+    curl\
+    jq \
+    git \
+    openjdk17 \
+    netcat-openbsd \
+    ca-certificates \
+    && curl -fSL "https://archive.apache.org/dist/kafka/${KAFKA_VERSION}/kafka_${SCALA_VERSION}-${KAFKA_VERSION}.tgz" -o /tmp/kafka.tgz && \
+    tar -xzf /tmp/kafka.tgz -C /opt && \
+    rm /tmp/kafka.tgz
+
+COPY --chmod=755 setup.sh /
+COPY --chmod=755 setup-kafka-target.sh /
+
+
+# ARG BASE_IMAGE
+
+# FROM ${BASE_IMAGE}
+
+# RUN apt-get update \
+#     && apt-get install -y --no-install-recommends \
+#     netcat
+
+# COPY --chmod=755 create-topics.sh /usr/local/bin/create-topics.sh
+
+# ENTRYPOINT ["/usr/local/bin/create-topics.sh"]

@@ -1,0 +1,191 @@
+{
+    "zookeeper": {
+        "connectionString": "127.0.0.1:2181/backbeat",
+        "autoCreateNamespace": true
+    },
+    "kafka": {
+        "hosts": "127.0.0.1:9092",
+        "backlogMetrics": {
+            "zkPath": "/run/kafka-backlog-metrics",
+            "intervalS": 60
+        }
+    },
+    "s3": {
+        "host": "127.0.0.1",
+        "port": 8000
+    },
+    "queuePopulator": {
+        "cronRule": "*/5 * * * * *",
+        "batchMaxRead": 10000,
+        "zookeeperPath": "/queue-populator",
+        "logSource": "bucketd",
+        "bucketd": {
+            "host": "127.0.0.1",
+            "port": 9000
+        },
+        "probeServer": {
+            "bindAddress": "localhost",
+            "port": 4042
+        }
+    },
+    "extensions": {
+        "replication": {
+            "source": {
+                "transport": "http",
+                "s3": {
+                    "host": "127.0.0.1",
+                    "port": 8000
+                },
+                "auth": {
+                    "type": "account",
+                    "account": "bart",
+                    "vault": {
+                        "host": "127.0.0.1",
+                        "port": 8500,
+                        "adminPort": 8600
+                    }
+                }
+            },
+            "destination": {
+                "transport": "http",
+                "bootstrapList": [
+                    { "site": "sf", "servers": ["127.0.0.1:9443"], "echo": false },
+                    { "site": "aws-location", "type": "aws_s3" }
+                ],
+                "auth": {
+                    "type": "account",
+                    "account": "lisa"
+                }
+            },
+            "topic": "backbeat-replication",
+            "replicationStatusTopic": "backbeat-replication-status",
+            "replicationFailedTopic": "backbeat-replication-failed",
+            "monitorReplicationFailures": true,
+            "monitorReplicationFailureExpiryTimeS": 86400,
+            "replayTopics": [
+                {
+                    "topicName": "backbeat-replication-replay-0",
+                    "retries": 5
+                }
+            ],
+            "queueProcessor": {
+                "groupId": "backbeat-replication-group",
+                "retryTimeoutS": 300,
+                "concurrency": 10,
+                "mpuPartsConcurrency": 10,
+                "probeServer": [
+                    {
+                        "site": "aws-location",
+                        "bindAddress": "localhost",
+                        "port": "4043"
+                    }, {
+                        "site" : "us-east-1",
+                        "bindAddress": "localhost",
+                        "port": "4044"
+                    }
+                ]
+            },
+            "replicationStatusProcessor": {
+                "groupId": "backbeat-replication-group",
+                "retryTimeoutS": 300,
+                "concurrency": 10,
+                "logConsumerMetricsIntervalS": 60,
+                "probeServer": {
+                    "bindAddress": "localhost",
+                    "port": 4045
+                }
+            },
+            "replayProcessor": {
+                "probeServer": [
+                    {
+                        "site": "aws-location",
+                        "topicName": "backbeat-replication-replay-0",
+                        "bindAddress": "localhost",
+                        "port": "4046"
+                    }, {
+                        "site" : "us-east-1",
+                        "topicName": "backbeat-replication-replay-0",
+                        "bindAddress": "localhost",
+                        "port": "4047"
+                    }
+                ]
+            },
+            "objectSizeMetrics": [
+                66560,
+                8388608,
+                68157440
+            ]
+        },
+        "lifecycle": {
+            "auth": {
+                "type": "assumeRole",
+                "roleName": "lifecycle-role",
+                "sts": {
+                    "host": "127.0.0.1",
+                    "port": 8800,
+                    "accessKey": "lifecycleAccessKey",
+                    "secretKey": "lifecycleSecretKey"
+                },
+                "vault": {
+                    "host": "127.0.0.1",
+                    "port": 8500
+                }
+            },
+            "zookeeperPath": "/lifecycle",
+            "bucketTasksTopic": "backbeat-lifecycle-bucket-tasks",
+            "objectTasksTopic": "backbeat-lifecycle-object-tasks",
+            "conductor": {
+                "backlogControl": { "enabled": true },
+                "cronRule": "*/5 * * * * *",
+                "concurrency": 10
+            },
+            "bucketProcessor": {
+                "groupId": "backbeat-lifecycle-bucket-processor-group",
+                "retry": {
+                    "maxRetries": 5,
+                    "timeoutS": 300,
+                    "backoff": {
+                        "min": 1000,
+                        "max": 300000,
+                        "jitter": 0.1,
+                        "factor": 1.5
+                    }
+                },
+                "concurrency": 10
+            },
+            "objectProcessor": {
+                "groupId": "backbeat-lifecycle-object-processor-group",
+                "retry": {
+                    "maxRetries": 5,
+                    "timeoutS": 300,
+                    "backoff": {
+                        "min": 1000,
+                        "max": 300000,
+                        "jitter": 0.1,
+                        "factor": 1.5
+                    }
+                },
+                "concurrency": 10
+            }
+        }
+    },
+    "log": {
+        "logLevel": "trace",
+        "dumpLevel": "error"
+    },
+    "metrics": {
+        "topic": "backbeat-metrics"
+    },
+    "server": {
+        "healthChecks": {
+            "allowFrom": ["127.0.0.1/8", "::1"]
+        },
+        "host": "127.0.0.1",
+        "port": 8900
+    },
+    "certFilePaths": {
+        "key": "",
+        "cert": "",
+        "ca": ""
+    }
+}

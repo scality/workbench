@@ -1,0 +1,223 @@
+
+services:
+  # setup:
+  #   build:
+  #     context: ./config/setup
+  #   container_name: workbench-setup
+  #   network_mode: host
+  #   profiles:
+  #     - base
+
+  metadata-s3:
+    image: ${METADATA_S3_IMAGE}
+    container_name: workbench-metadata-s3
+    network_mode: host
+    volumes:
+      - ./config/metadata-s3/config.json:/mnt/standalone_workdir/config.json:ro
+    profiles:
+      - base
+
+  metadata-scuba:
+    image: ${METADATA_SCUBA_IMAGE}
+    container_name: workbench-metadata-scuba
+    network_mode: host
+    volumes:
+      - ./config/metadata-scuba/config.json:/mnt/standalone_workdir/config.json:ro
+    profiles:
+      - feature-scuba
+
+  s3-data:
+    image: ${CLOUDSERVER_IMAGE}
+    container_name: workbench-s3-data
+    network_mode: host
+    command: node dataserver.js
+    volumes:
+      - ./config/cloudserver/config.json:/conf/config.json:ro
+    profiles:
+      - base
+
+  cloudserver:
+    image: ${CLOUDSERVER_IMAGE}
+    container_name: workbench-s3
+    network_mode: host
+    command: node index.js
+    environment:
+      S3DATA: file
+      S3METADATA: scality
+      S3VAULT: scality
+      BUCKETD_BOOTSTRAP: localhost:9000
+      S3_CONFIG_FILE: /conf/config.json
+      MPU_TESTING: 'yes'
+      ENABLE_NULL_VERSION_COMPAT_MODE: ${CLOUDSERVER_ENABLE_NULL_VERSION_COMPAT_MODE}
+    volumes:
+      - ./config/cloudserver/config.json:/conf/config.json:ro
+    profiles:
+      - base
+
+  vault:
+    image: ${VAULT_IMAGE}
+    container_name: workbench-vault
+    network_mode: host
+    command: sh -c "chmod 400 tests/utils/keyfile && yarn start"
+    environment:
+      VAULT_DB_BACKEND: LEVELDB
+    volumes:
+      - ./config/vault/config.json:/conf/config.json:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -o /dev/null http://127.0.0.1:8500/_/healthcheck"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    profiles:
+      - base
+
+  setup-vault:
+    build:
+      context: ./config/vault
+      dockerfile: Dockerfile.setup
+      args:
+        BASE_IMAGE: ${VAULT_IMAGE}
+    container_name: workbench-setup-vault
+    network_mode: host
+    volumes:
+      - ./config/vault/management-creds.json:/conf/management-creds.json:ro
+    depends_on:
+      vault:
+        condition: service_healthy
+    profiles:
+      - base
+
+  scuba:
+    image: ${SCUBA_IMAGE}
+    container_name: workbench-scuba
+    network_mode: host
+    environment:
+      SUPERVISORD_CONF: 'supervisord.conf'
+    profiles:
+      - feature-scuba
+    volumes:
+      - ./config/scuba/env:/conf/env:ro
+      - ./config/scuba/supervisord.conf:/conf/supervisord.conf:ro
+      - ./config/scuba/config.json:/conf/config.json:ro
+      - ./logs/scuba:/logs
+
+  setup-scuba:
+    build:
+      context: ./config/scuba
+      dockerfile: Dockerfile.setup
+      args:
+        BASE_IMAGE: ${SCUBA_IMAGE}
+    container_name: workbench-setup-scuba
+    network_mode: host
+    depends_on:
+      setup-vault:
+        condition: service_completed_successfully
+    volumes:
+      - ./config/vault/:/secrets
+    profiles:
+      - feature-scuba
+
+  redis:
+    image: ${REDIS_IMAGE}
+    container_name: workbench-redis
+    network_mode: host
+    profiles:
+      - feature-crr
+      - feature-notifications
+
+  zookeeper:
+    image: ${ZOOKEEPER_IMAGE}
+    container_name: workbench-zookeeper
+    network_mode: host
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    profiles:
+      - feature-crr
+      - feature-notifications
+
+  kafka:
+    image: ${KAFKA_IMAGE}
+    container_name: workbench-kafka
+    network_mode: host
+    environment:
+      KAFKA_CFG_ZOOKEEPER_CONNECT: '127.0.0.1:2181/backbeat'
+      KAFKA_CFG_LISTENERS: 'PLAINTEXT://:9092'
+      KAFKA_CFG_ADVERTISED_LISTENERS: 'PLAINTEXT://127.0.0.1:9092'
+      ALLOW_PLAINTEXT_LISTENER: 'yes'
+      KAFKA_ENABLE_KRAFT: 'no'
+    profiles:
+      - feature-crr
+      - feature-notifications
+
+  kafka-target:
+    image: ${KAFKA_IMAGE}
+    container_name: workbench-kafka-target
+    network_mode: host
+    environment:
+      KAFKA_CFG_ZOOKEEPER_CONNECT: '127.0.0.1:2181/notifytarget'
+      KAFKA_CFG_LISTENERS: 'PLAINTEXT://:9093'
+      KAFKA_CFG_ADVERTISED_LISTENERS: 'PLAINTEXT://127.0.0.1:9093'
+      ALLOW_PLAINTEXT_LISTENER: 'yes'
+      KAFKA_ENABLE_KRAFT: 'no'
+    profiles:
+      - feature-notifications
+
+  setup-kafka-target:
+    build:
+      context: ./config/backbeat
+      dockerfile: Dockerfile.setup
+      args:
+        BASE_IMAGE: ${KAFKA_IMAGE}
+    container_name: workbench-setup-kafka-target
+    network_mode: host
+    command: /setup-kafka-target.sh
+    profiles:
+      - feature-notifications
+
+
+  backbeat:
+    image: ${BACKBEAT_IMAGE}
+    container_name: workbench-backbeat
+    network_mode: host
+    environment:
+      SUPERVISORD_CONF: supervisord.conf
+      BACKBEAT_CONFIG_FILE: /conf/config.json
+    volumes:
+      - ./config/backbeat/supervisord.conf:/conf/supervisord.conf:ro
+      - ./config/backbeat/config.json:/conf/config.json:ro
+      - ./config/backbeat/config.notification.json:/conf/config.notification.json:ro
+      - ./config/backbeat/env:/conf/env:ro
+      - ./logs/backbeat:/logs
+    profiles:
+      - feature-crr
+      - feature-notifications
+
+  setup-backbeat:
+    build:
+      context: ./config/backbeat
+      dockerfile: Dockerfile.setup
+      args:
+        BASE_IMAGE: ${KAFKA_IMAGE}
+    container_name: workbench-setup-backbeat
+    network_mode: host
+    profiles:
+      - feature-crr
+      - feature-notifications
+    depends_on:
+      setup-vault:
+        condition: service_completed_successfully
+
+  # setup-scuba:
+  #   build:
+  #     context: ./config/scuba
+  #     dockerfile: Dockerfile.setup
+  #     args:
+  #       BASE_IMAGE: ${SCUBA_IMAGE}
+  #   container_name: workbench-setup-scuba
+  #   network_mode: host
+  #   depends_on:
+  #     setup-vault:
+  #       condition: service_completed_successfully
+  #   volumes:
+  #     - ./config/vault/:/secrets
