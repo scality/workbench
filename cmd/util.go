@@ -66,7 +66,8 @@ func buildDockerComposeCommand(cfg Config, args ...string) []string {
 	profiles := getComposeProfiles(cfg)
 
 	dockerComposeCmd := []string{
-		"docker-compose",
+		"docker",
+		"compose",
 		"--env-file",
 		"defaults.env",
 	}
