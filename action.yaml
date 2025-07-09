@@ -1,0 +1,47 @@
+name: Workbench Up
+
+description: "Run workbench up with default configuration to start S3C workbench environment"
+
+inputs:
+  environment:
+    description: "Name of the environment to start (defaults to 'default')"
+    required: false
+    default: "default"
+  environment-dir:
+    description: "Directory to store the environment"
+    required: false
+    default: "env"
+  build:
+    description: "Build images before starting containers"
+    required: false
+    default: "false"
+  no-cache:
+    description: "Do not use cache when building images"
+    required: false
+    default: "false"
+
+runs:
+  using: "composite"
+  steps:
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.24.3'
+
+    - name: Build workbench
+      shell: bash
+      run: |
+        make build
+        sudo mv workbench /usr/local/bin/workbench
+      working-directory: ${{ github.action_path }}
+
+    - name: Start workbench environment
+      shell: bash
+      run: |
+        workbench up \
+          --detach \
+          --name ${{ inputs.environment }} \
+          --env-dir ${{ inputs.environment-dir }} \
+          ${{ inputs.build == 'true' && '--build' || '' }} \
+          ${{ inputs.no-cache == 'true' && '--no-cache' || '' }}
