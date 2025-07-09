@@ -13,6 +13,9 @@ features:
       username: admin
       password: admin123
 
+  utapi:
+    enabled: false
+
 cloudserver:
   image: ghcr.io/scality/cloudserver:7.70.62
 
@@ -39,3 +42,6 @@ zookeeper:
 
 redis:
   image: redis:7
+
+utapi:
+  image: ghcr.io/scality/utapi:7.70.7

@@ -48,6 +48,7 @@ func configureEnv(cfg Config, envDir string) error {
 		generateS3MetadataConfig,
 		generateScubaMetadataConfig,
 		generateKafkaConfig,
+		generateUtapiConfig,
 	}
 
 	configDir := filepath.Join(envDir, "config")
@@ -131,4 +132,8 @@ func generateKafkaConfig(cfg Config, path string) error {
 	}
 
 	return renderTemplates(cfg, "templates/kafka", filepath.Join(path, "kafka"), templates)
+}
+
+func generateUtapiConfig(cfg Config, path string) error {
+	return renderTemplateToFile(getTemplates(), "templates/utapi/config.json", cfg, filepath.Join(path, "utapi", "config.json"))
 }

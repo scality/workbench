@@ -71,6 +71,10 @@ func getComposeProfiles(cfg Config) []string {
 		profiles = append(profiles, "feature-notifications")
 	}
 
+	if cfg.Features.Utapi.Enabled {
+		profiles = append(profiles, "feature-utapi")
+	}
+
 	return profiles
 }
 
