@@ -38,12 +38,12 @@ type ScubaFeatureConfig struct {
 }
 
 type BucketNotificationsFeatureConfig struct {
-	Enabled    bool `yaml:"enabled"`
-	TargetAuth struct {
+	Enabled         bool `yaml:"enabled"`
+	DestinationAuth struct {
 		Type     string `yaml:"type"`
 		Username string `yaml:"username"`
 		Password string `yaml:"password"`
-	} `yaml:"targetAuth"`
+	} `yaml:"destinationAuth"`
 }
 
 type CloudserverConfig struct {
@@ -149,6 +149,17 @@ func DefaultConfig() Config {
 		Global: GlobalConfig{
 			LogLevel: "info",
 			// Profile:  "default",
+		},
+		Features: FeatureConfig{
+			BucketNotifications: BucketNotificationsFeatureConfig{
+				DestinationAuth: struct {
+					Type     string `yaml:"type"`
+					Username string `yaml:"username"`
+					Password string `yaml:"password"`
+				}{
+					Type: "none",
+				},
+			},
 		},
 		Cloudserver: CloudserverConfig{},
 		S3Metadata: MetadataConfig{
