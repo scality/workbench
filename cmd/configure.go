@@ -75,61 +75,34 @@ func generateCloudserverConfig(cfg Config, path string) error {
 
 func generateBackbeatConfig(cfg Config, path string) error {
 	templates := []string{
-		"Dockerfile.setup",
-		"setup.sh",
-		"setup-kafka-target.sh",
-		"config.notification.json",
-		"config.json",
-		"supervisord.conf",
 		"env",
+		"supervisord.conf",
+		"config.json",
+		"config.notification.json",
+		"notificationCredentials.json",
 	}
 
-	for _, tmpl := range templates {
-		templatePath := filepath.Join("templates", "backbeat", tmpl)
-		outputPath := filepath.Join(path, "backbeat", tmpl)
-		if err := renderTemplateToFile(getTemplates(), templatePath, cfg, outputPath); err != nil {
-			return fmt.Errorf("failed to render template %s: %w", tmpl, err)
-		}
-	}
-	return nil
+	return renderTemplates(cfg, "templates/backbeat", filepath.Join(path, "backbeat"), templates)
 }
 
 func generateVaultConfig(cfg Config, path string) error {
-	err := renderTemplateToFile(getTemplates(), "templates/vault/config.json", cfg, filepath.Join(path, "vault", "config.json"))
-	if err != nil {
-		return err
+	templates := []string{
+		"config.json",
+		"create-management-account.sh",
+		"Dockerfile.setup",
+		"management-creds.json",
 	}
 
-	err = renderTemplateToFile(getTemplates(), "templates/vault/create-management-account.sh", cfg, filepath.Join(path, "vault", "create-management-account.sh"))
-	if err != nil {
-		return err
-	}
-
-	err = renderTemplateToFile(getTemplates(), "templates/vault/Dockerfile.setup", cfg, filepath.Join(path, "vault", "Dockerfile.setup"))
-	if err != nil {
-		return err
-	}
-
-	err = renderTemplateToFile(getTemplates(), "templates/vault/management-creds.json", cfg, filepath.Join(path, "vault", "management-creds.json"))
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return renderTemplates(cfg, "templates/vault", filepath.Join(path, "vault"), templates)
 }
 
 func generateScubaConfig(cfg Config, path string) error {
-	err := renderTemplateToFile(getTemplates(), "templates/scuba/create-service-user.sh", cfg, filepath.Join(path, "scuba", "create-service-user.sh"))
-	if err != nil {
-		return err
+	templates := []string{
+		"config.json",
+		"create-service-user.sh",
+		"Dockerfile.setup",
 	}
-
-	err = renderTemplateToFile(getTemplates(), "templates/scuba/Dockerfile.setup", cfg, filepath.Join(path, "scuba", "Dockerfile.setup"))
-	if err != nil {
-		return err
-	}
-
-	return renderTemplateToFile(getTemplates(), "templates/scuba/config.json", cfg, filepath.Join(path, "scuba", "config.json"))
+	return renderTemplates(cfg, "templates/scuba", filepath.Join(path, "scuba"), templates)
 }
 
 func generateMetadataConfig(cfg MetadataConfig, path string) error {
