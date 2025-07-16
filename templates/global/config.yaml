@@ -7,9 +7,9 @@ features:
     enable_service_user: true
 
   bucket_notifications:
-    enabled: true
-    targetAuth:
-      type: basic
+    enabled: false
+    destinationAuth:
+      type: none
       username: admin
       password: admin123
 

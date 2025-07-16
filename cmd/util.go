@@ -48,6 +48,18 @@ func renderTemplateToFile(templates fs.FS, tmplPath string, data any, outPath st
 	return nil
 }
 
+func renderTemplates(cfg Config, srcDir, destDir string, templates []string) error {
+	templateFS := getTemplates()
+	for _, tmpl := range templates {
+		templatePath := filepath.Join(srcDir, tmpl)
+		outputPath := filepath.Join(destDir, tmpl)
+		if err := renderTemplateToFile(templateFS, templatePath, cfg, outputPath); err != nil {
+			return fmt.Errorf("failed to render template %s: %w", tmpl, err)
+		}
+	}
+	return nil
+}
+
 func getComposeProfiles(cfg Config) []string {
 	profiles := []string{"base"}
 

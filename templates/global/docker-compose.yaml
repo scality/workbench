@@ -118,64 +118,6 @@ services:
     profiles:
       - feature-scuba
 
-  redis:
-    image: ${REDIS_IMAGE}
-    container_name: workbench-redis
-    network_mode: host
-    profiles:
-      - feature-crr
-      - feature-notifications
-
-  zookeeper:
-    image: ${ZOOKEEPER_IMAGE}
-    container_name: workbench-zookeeper
-    network_mode: host
-    environment:
-      - ALLOW_ANONYMOUS_LOGIN=yes
-    profiles:
-      - feature-crr
-      - feature-notifications
-
-  kafka:
-    image: ${KAFKA_IMAGE}
-    container_name: workbench-kafka
-    network_mode: host
-    environment:
-      KAFKA_CFG_ZOOKEEPER_CONNECT: '127.0.0.1:2181/backbeat'
-      KAFKA_CFG_LISTENERS: 'PLAINTEXT://:9092'
-      KAFKA_CFG_ADVERTISED_LISTENERS: 'PLAINTEXT://127.0.0.1:9092'
-      ALLOW_PLAINTEXT_LISTENER: 'yes'
-      KAFKA_ENABLE_KRAFT: 'no'
-    profiles:
-      - feature-crr
-      - feature-notifications
-
-  kafka-target:
-    image: ${KAFKA_IMAGE}
-    container_name: workbench-kafka-target
-    network_mode: host
-    environment:
-      KAFKA_CFG_ZOOKEEPER_CONNECT: '127.0.0.1:2181/notifytarget'
-      KAFKA_CFG_LISTENERS: 'PLAINTEXT://:9093'
-      KAFKA_CFG_ADVERTISED_LISTENERS: 'PLAINTEXT://127.0.0.1:9093'
-      ALLOW_PLAINTEXT_LISTENER: 'yes'
-      KAFKA_ENABLE_KRAFT: 'no'
-    profiles:
-      - feature-notifications
-
-  setup-kafka-target:
-    build:
-      context: ./config/backbeat
-      dockerfile: Dockerfile.setup
-      args:
-        BASE_IMAGE: ${KAFKA_IMAGE}
-    container_name: workbench-setup-kafka-target
-    network_mode: host
-    command: /setup-kafka-target.sh
-    profiles:
-      - feature-notifications
-
-
   backbeat:
     image: ${BACKBEAT_IMAGE}
     container_name: workbench-backbeat
@@ -193,31 +135,87 @@ services:
       - feature-crr
       - feature-notifications
 
-  setup-backbeat:
-    build:
-      context: ./config/backbeat
-      dockerfile: Dockerfile.setup
-      args:
-        BASE_IMAGE: ${KAFKA_IMAGE}
-    container_name: workbench-setup-backbeat
+  redis:
+    image: ${REDIS_IMAGE}
+    container_name: workbench-redis
     network_mode: host
     profiles:
       - feature-crr
       - feature-notifications
+
+  zookeeper:
+    build:
+      context: ./config/kafka
+    restart: on-failure
+    container_name: workbench-zookeeper
+    network_mode: host
+    command: /opt/kafka/bin/zookeeper-server-start.sh /opt/kafka/config/zookeeper.properties
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    volumes:
+      - ./config/kafka/zookeeper.properties:/opt/kafka/config/zookeeper.properties:ro
+      - ./data/zookeeper:/data
+    profiles:
+      - feature-crr
+      - feature-notifications
+
+  kafka:
+    build:
+      context: ./config/kafka
+    restart: on-failure
+    container_name: workbench-kafka
+    network_mode: host
+    command: /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties
+    volumes:
+      - ./config/kafka/server.backbeat.properties:/opt/kafka/config/server.properties:ro
+      - ./data/kafka:/data
+    profiles:
+      - feature-crr
+      - feature-notifications
+
+  setup-kafka:
+    build:
+      context: ./config/kafka
+    container_name: workbench-setup-kafka
+    command: /usr/local/bin/setup-kafka.sh
+    network_mode: host
+    environment:
+      KAFKA_PORT: '9092'
+      TOPICS_TO_CREATE: backbeat-lifecycle-bucket-tasks backbeat-lifecycle-object-tasks backbeat-bucket-notification
+      CREATE_NOTIFICATION_PATHS: 'true'
+      ZOOKEEPER_ENDPOINT: 127.0.0.1:2181/backbeat
     depends_on:
       setup-vault:
         condition: service_completed_successfully
+    profiles:
+      - feature-crr
+      - feature-notifications
 
-  # setup-scuba:
-  #   build:
-  #     context: ./config/scuba
-  #     dockerfile: Dockerfile.setup
-  #     args:
-  #       BASE_IMAGE: ${SCUBA_IMAGE}
-  #   container_name: workbench-setup-scuba
-  #   network_mode: host
-  #   depends_on:
-  #     setup-vault:
-  #       condition: service_completed_successfully
-  #   volumes:
-  #     - ./config/vault/:/secrets
+  kafka-destination:
+    build:
+      context: ./config/kafka
+    restart: on-failure
+    container_name: workbench-kafka-destination
+    network_mode: host
+    command: /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties
+    profiles:
+      - feature-notifications
+    volumes:
+      - ./config/kafka/server.destination.properties:/opt/kafka/config/server.properties:ro
+      - ./config/kafka/config.properties:/opt/kafka/config/config.properties:ro
+      - ./data/kafka-destination:/data
+
+  setup-kafka-destination:
+    build:
+      context: ./config/kafka
+    container_name: workbench-setup-kafka-destination
+    environment:
+      TOPICS_TO_CREATE: notifications
+      KAFKA_PORT: '9094'
+      JAAS_CONFIG: '/opt/kafka/config/config.properties'
+    network_mode: host
+    command: /usr/local/bin/setup-kafka.sh
+    profiles:
+      - feature-notifications
+    volumes:
+      - ./config/kafka/config.properties:/opt/kafka/config/config.properties:ro

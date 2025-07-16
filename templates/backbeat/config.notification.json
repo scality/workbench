@@ -35,9 +35,16 @@
                 {
                     "resource": "destination1",
                     "type": "kafka",
-                    "host": "localhost:9092",
-                    "topic": "destination-topic",
+                    "host": "127.0.0.1:9094",
+                    "topic": "notifications",
+                    {{ if eq .Features.BucketNotifications.DestinationAuth.Type "basic" }}
+                    "auth": {
+                        "type": "basic",
+                        "credentialsFile": "notificationCredentials.json"
+                    }
+                    {{ else if eq .Features.BucketNotifications.DestinationAuth.Type "none" }}
                     "auth": {}
+                    {{ end }}
                 }
             ]
         }

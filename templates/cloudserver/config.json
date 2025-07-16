@@ -89,8 +89,8 @@
             "resource": "destination1",
             "type": "kafka",
             "host": "127.0.0.1",
-            "port": 9093,
-            "topic": "destination-topic",
+            "port": 9094,
+            "topic": "notifications",
             "auth": {}
         }
     ],
