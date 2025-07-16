@@ -47,6 +47,7 @@ func configureEnv(cfg Config, envDir string) error {
 		generateScubaConfig,
 		generateS3MetadataConfig,
 		generateScubaMetadataConfig,
+		generateKafkaConfig,
 	}
 
 	configDir := filepath.Join(envDir, "config")
@@ -117,4 +118,17 @@ func generateS3MetadataConfig(cfg Config, path string) error {
 func generateScubaMetadataConfig(cfg Config, path string) error {
 	cfgPath := filepath.Join(path, "metadata-scuba")
 	return generateMetadataConfig(cfg.ScubaMetadata, cfgPath)
+}
+
+func generateKafkaConfig(cfg Config, path string) error {
+	templates := []string{
+		"Dockerfile",
+		"setup.sh",
+		"server.backbeat.properties",
+		"server.destination.properties",
+		"config.properties",
+		"zookeeper.properties",
+	}
+
+	return renderTemplates(cfg, "templates/kafka", filepath.Join(path, "kafka"), templates)
 }
