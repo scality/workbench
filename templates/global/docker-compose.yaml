@@ -146,6 +146,7 @@ services:
   zookeeper:
     build:
       context: ./config/kafka
+    restart: on-failure
     container_name: workbench-zookeeper
     network_mode: host
     command: /opt/kafka/bin/zookeeper-server-start.sh /opt/kafka/config/zookeeper.properties
