@@ -9,10 +9,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func toPtrBool(b bool) *bool {
-	return &b
-}
-
 var CLI struct {
 	LogLevel     string       `help:"Set the log level." enum:"trace,debug,info,warn,error" default:"info"`
 	LogFormat    string       `enum:"json,text" default:"text" help:"Set the log format. (json, text)"`

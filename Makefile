@@ -7,6 +7,9 @@ run:
 	go build -o $(BINARY_NAME) ./cmd
 	./$(BINARY_NAM)
 
+lint:
+	golangci-lint run
+
 clean:
 	go clean
 	rm ${BINARY_NAME}
