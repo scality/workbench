@@ -29,7 +29,7 @@
     "readerBackend": {
         "type": "scality",
         "host": "127.0.0.1",
-        "port": 9990,
+        "port": 9000,
         "refreshPeriodMs": 5000,
         "retryDelayMs": 1000,
         "maxRetryDelayMs": 30000,
@@ -37,9 +37,9 @@
         "maxRecordsPerRequest": 1000
     },
     "storageBackend": {
-        "type": "file",
+        "type": "scality",
         "host": "127.0.0.1",
-        "port": 19990,
+        "port": 19000,
         "metadataFormatV1": false
     },
     "serviceUser": {
