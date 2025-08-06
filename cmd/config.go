@@ -20,6 +20,7 @@ type Config struct {
 	Kafka         KafkaConfig       `yaml:"kafka"`
 	Zookeeper     ZookeeperConfig   `yaml:"zookeeper"`
 	Redis         RedisConfig       `yaml:"redis"`
+	Utapi         UtapiConfig       `yaml:"utapi"`
 }
 
 type GlobalConfig struct {
@@ -30,6 +31,7 @@ type GlobalConfig struct {
 type FeatureConfig struct {
 	Scuba               ScubaFeatureConfig               `yaml:"scuba"`
 	BucketNotifications BucketNotificationsFeatureConfig `yaml:"bucket_notifications"`
+	Utapi               UtapiFeatureConfig               `yaml:"utapi"`
 }
 
 type ScubaFeatureConfig struct {
@@ -46,6 +48,10 @@ type BucketNotificationsFeatureConfig struct {
 	} `yaml:"destinationAuth"`
 }
 
+type UtapiFeatureConfig struct {
+	Enabled bool `yaml:"enabled"`
+}
+
 type CloudserverConfig struct {
 	Image                       string `yaml:"image"`
 	EnableNullVersionCompatMode bool   `yaml:"enableNullVersionCompatMode"`
@@ -58,6 +64,11 @@ type BackbeatConfig struct {
 }
 
 type VaultConfig struct {
+	Image    string `yaml:"image"`
+	LogLevel string `yaml:"log_level"`
+}
+
+type UtapiConfig struct {
 	Image    string `yaml:"image"`
 	LogLevel string `yaml:"log_level"`
 }
@@ -160,6 +171,9 @@ func DefaultConfig() Config {
 					Type: "none",
 				},
 			},
+			Utapi: UtapiFeatureConfig{
+				Enabled: false,
+			},
 		},
 		Cloudserver: CloudserverConfig{},
 		S3Metadata: MetadataConfig{
@@ -185,6 +199,7 @@ func DefaultConfig() Config {
 			RaftSessions: 1,
 			// LogLevel:     "info",
 		},
+		Utapi: UtapiConfig{},
 	}
 }
 

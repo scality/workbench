@@ -142,6 +142,7 @@ services:
     profiles:
       - feature-crr
       - feature-notifications
+      - feature-utapi
 
   zookeeper:
     build:
@@ -219,3 +220,15 @@ services:
       - feature-notifications
     volumes:
       - ./config/kafka/config.properties:/opt/kafka/config/config.properties:ro
+
+  utapi:
+    profiles:
+      - feature-utapi
+    image: ${UTAPI_IMAGE}
+    container_name: workbench-utapi
+    network_mode: host
+    command: ["bash", "-c", "yarn start"]
+    volumes:
+      - ./config/utapi/config.json:/conf/config.json:ro
+    environment:
+      UTAPI_CONFIG_FILE: /conf/config.json
