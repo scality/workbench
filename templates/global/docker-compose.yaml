@@ -100,7 +100,7 @@ services:
       - ./config/scuba/env:/conf/env:ro
       - ./config/scuba/supervisord.conf:/conf/supervisord.conf:ro
       - ./config/scuba/config.json:/conf/config.json:ro
-      - ./logs/scuba:/logs
+      - ./logs/scuba:/logs:rw
 
   setup-scuba:
     build:

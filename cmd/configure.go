@@ -103,6 +103,8 @@ func generateScubaConfig(cfg Config, path string) error {
 		"config.json",
 		"create-service-user.sh",
 		"Dockerfile.setup",
+		"supervisord.conf",
+		"env",
 	}
 	return renderTemplates(cfg, "templates/scuba", filepath.Join(path, "scuba"), templates)
 }
