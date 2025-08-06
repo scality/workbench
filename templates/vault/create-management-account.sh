@@ -4,7 +4,7 @@ set -x
 # === Constants ===
 VAULT_ENDPOINT=http://127.0.0.1:8600
 REGION=us-east-1
-PROFILE=management
+PROFILE=scality-internal-services
 # CONFIG_FILE=/config/backbeat-config.json
 
 # === Environment Echo ===
@@ -35,34 +35,22 @@ echo "[setup] vaultclient configured with /tmp/vaultclient.conf"
 echo
 
 # === Create management account ===
-echo "[setup] Checking if management account already exists..."
-if ./node_modules/vaultclient/bin/vaultclient list-accounts --host 127.0.0.1 --port 8600 | jq -e '.accounts[] | select(.name=="management")' > /dev/null; then
-  echo "[setup] Management account already exists, skipping creation."
-else
-  echo "[setup] Creating management account..."
-  ./node_modules/vaultclient/bin/vaultclient create-account --name management --email dev@null --host 127.0.0.1 --port 8600 --accountid 000000000000
-  echo
-fi
 
 MANAGEMENT_ACCESS_KEY=$(jq -r '.accessKey' /conf/management-creds.json)
 MANAGEMENT_SECRET_KEY=$(jq -r '.secretKey' /conf/management-creds.json)
 
-echo "[setup] Creating access key for management account..."
+echo "[setup] Ensure management account is configured..."
 resp=$(./node_modules/vaultclient/bin/vaultclient \
-        generate-account-access-key \
+        ensure-internal-services-account \
         --host 127.0.0.1 \
         --port 8600 \
-        --name management \
         --accesskey "$MANAGEMENT_ACCESS_KEY" \
         --secretkey "$MANAGEMENT_SECRET_KEY")
+
 if [ $? -ne 0 ]; then
-  if echo "$resp" | grep -q EntityAlreadyExists; then
-    echo "[setup] Access key already exists for management account."
-  else
-    echo "[setup] Error creating access key for management account:"
-    echo "$resp"
-    exit 1
-  fi
+  echo "[setup] Error configuring management account:"
+  echo "$resp"
+  exit 1
 fi
 
 echo "[setup] Management account and access key setup completed successfully 🎉"
