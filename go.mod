@@ -1,4 +1,4 @@
-module github.com/tmacro/workbench
+module github.com/scality/workbench
 
 go 1.24.3
 

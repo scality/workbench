@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/tmacro/workbench"
+	"github.com/scality/workbench"
 )
 
 func getTemplates() fs.FS {

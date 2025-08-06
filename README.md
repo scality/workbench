@@ -10,7 +10,7 @@ Workbench requires Docker Compose v2.
 Go 1.24.3 or newer is required to build Workbench.
 
 ```shell
-> git clone https://github.com/tmacro/workbench.git
+> git clone https://github.com/scality/workbench.git
 > cd workbench/
 > make
 ```
