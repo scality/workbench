@@ -91,7 +91,12 @@ services:
   scuba:
     image: ${SCUBA_IMAGE}
     container_name: workbench-scuba
+    restart: on-failure
     network_mode: host
+    depends_on:
+      - vault
+      - metadata-scuba
+      - metadata-s3
     environment:
       SUPERVISORD_CONF: 'supervisord.conf'
     profiles:
