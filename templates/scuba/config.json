@@ -44,7 +44,7 @@
     },
     "serviceUser": {
         "arn": "arn:aws:iam::000000000000:user/scality-internal/service-scuba-user",
-        "enable": false
+        "enable": true
     },
     "repair": {
         "enableAutoRepair": true,
