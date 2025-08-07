@@ -33,8 +33,27 @@ func (c *ConfigureCmd) Run() error {
 	return nil
 }
 
+func createLogDirectories(envDir string) error {
+	logDirs := []string{
+		filepath.Join(envDir, "logs"),
+		filepath.Join(envDir, "logs", "scuba"),
+		filepath.Join(envDir, "logs", "backbeat"),
+	}
+
+	for _, dir := range logDirs {
+		if err := os.MkdirAll(dir, 0777); err != nil {
+			return fmt.Errorf("failed to create log directory %s: %w", dir, err)
+		}
+	}
+	return nil
+}
+
 func configureEnv(cfg Config, envDir string) error {
 	log.Info().Msgf("Configuring environment %s", envDir)
+
+	if err := createLogDirectories(envDir); err != nil {
+		return fmt.Errorf("failed to create log directories: %w", err)
+	}
 
 	if err := generateDefaultsEnv(cfg, envDir); err != nil {
 		return fmt.Errorf("failed to generate defaults.env: %w", err)
