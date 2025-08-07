@@ -43,7 +43,7 @@
         "metadataFormatV1": false
     },
     "serviceUser": {
-        "arn": "arn:aws:iam::000000000000:user/scality-internal/service-scuba-user",
+        "arn": "arn:aws:iam::000000000000:user/scality-internal/scuba",
         "enable": true
     },
     "repair": {
