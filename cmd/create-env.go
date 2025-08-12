@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -9,20 +10,29 @@ import (
 )
 
 type CreateEnvCmd struct {
-	EnvDir    string `help:"Directory to create the environment in." required:"" short:"d" default:"./env"`
-	Name      string `help:"Name of the environment to create." required:"" short:"n" default:"default"`
-	Overwrite bool   `help:"Overwrite the environment if it already exists." short:"o"`
+	EnvDir     string `help:"Directory to create the environment in." required:"" short:"d" default:"./env"`
+	Name       string `help:"Name of the environment to create." required:"" short:"n" default:"default"`
+	Overwrite  bool   `help:"Overwrite the environment if it already exists." short:"o"`
+	WithConfig string `help:"Path to a custom configuration file. Replaces the default config." type:"existingfile"`
 }
 
 func (c *CreateEnvCmd) Run() error {
-	envPath, err := createEnv(c.EnvDir, c.Name, c.Overwrite)
+	envPath, err := createEnv(c.EnvDir, c.Name, c.Overwrite, c.WithConfig)
 	if err != nil {
 		return fmt.Errorf("failed to create environment: %w", err)
 	}
 
-	cfg, err := LoadConfig(filepath.Join(envPath, "config.yaml"))
-	if err != nil {
-		return fmt.Errorf("failed to load config: %w", err)
+	var cfg Config
+	if c.WithConfig != "" {
+		cfg, err = LoadConfig(c.WithConfig)
+		if err != nil {
+			return fmt.Errorf("failed to load custom config: %w", err)
+		}
+	} else {
+		cfg, err = LoadConfig(filepath.Join(envPath, "config.yaml"))
+		if err != nil {
+			return fmt.Errorf("failed to load config: %w", err)
+		}
 	}
 
 	if err := configureEnv(cfg, envPath); err != nil {
@@ -32,7 +42,7 @@ func (c *CreateEnvCmd) Run() error {
 	return nil
 }
 
-func createEnv(envDir string, name string, overwrite bool) (string, error) {
+func createEnv(envDir string, name string, overwrite bool, customConfig string) (string, error) {
 	log.Info().Msgf("Creating new environment %s", name)
 
 	// Check if envDir exists, if not create it
@@ -54,16 +64,37 @@ func createEnv(envDir string, name string, overwrite bool) (string, error) {
 		return "", err
 	}
 
-	// Template the global config if it doesn't exist
 	configPath := filepath.Join(envPath, "config.yaml")
 	_, err := os.Stat(configPath)
 	if err != nil && !os.IsNotExist(err) {
 		return "", fmt.Errorf("failed to check config file: %w", err)
 	}
+
+	// Create the global config if it doesn't exist
 	if os.IsNotExist(err) || overwrite {
-		err := renderTemplateToFile(getTemplates(), "templates/global/config.yaml", nil, configPath)
-		if err != nil {
-			return "", err
+		if customConfig != "" {
+			log.Info().Msgf("Using custom configuration file: %s", customConfig)
+			// Copy the custom config file to the environment directory
+			source, err := os.Open(customConfig)
+			if err != nil {
+				return "", err
+			}
+			defer source.Close()
+
+			destination, err := os.Create(configPath)
+			if err != nil {
+				return "", err
+			}
+			defer destination.Close()
+			_, err = io.Copy(destination, source)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			err := renderTemplateToFile(getTemplates(), "templates/global/config.yaml", nil, configPath)
+			if err != nil {
+				return "", err
+			}
 		}
 	}
 

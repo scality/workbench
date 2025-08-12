@@ -21,6 +21,7 @@ type UpCmd struct {
 	Detach      bool   `help:"Run containers in detached mode." short:"d"`
 	Build       bool   `help:"Build images before starting containers." short:"b"`
 	NoCache     bool   `help:"Do not use cache when building images." short:"c"`
+	WithConfig  string `help:"Path to a custom configuration file. Replaces the default config." type:"existingfile"`
 }
 
 func (c *UpCmd) Run() error {
@@ -28,7 +29,7 @@ func (c *UpCmd) Run() error {
 	envPath := filepath.Join(c.EnvDir, c.Name)
 	created := false
 	if _, err := os.Stat(envPath); os.IsNotExist(err) {
-		if _, err := createEnv(c.EnvDir, c.Name, c.Overwrite); err != nil {
+		if _, err := createEnv(c.EnvDir, c.Name, c.Overwrite, c.WithConfig); err != nil {
 			return fmt.Errorf("failed to create environment: %w", err)
 		}
 		created = true
