@@ -12,6 +12,12 @@ services:
     image: ${METADATA_S3_IMAGE}
     container_name: workbench-metadata-s3
     network_mode: host
+    healthcheck:
+      test: ["CMD-SHELL", "curl -o /dev/null http://127.0.0.1:9000/_/healthcheck"]
+      interval: 10s
+      retries: 10
+      start_period: 30s
+      timeout: 10s
     volumes:
       - ./config/metadata-s3/config.json:/mnt/standalone_workdir/config.json:ro
     profiles:
@@ -21,6 +27,12 @@ services:
     image: ${METADATA_SCUBA_IMAGE}
     container_name: workbench-metadata-scuba
     network_mode: host
+    healthcheck:
+      test: ["CMD-SHELL", "curl -o /dev/null http://127.0.0.1:19000/_/healthcheck"]
+      interval: 10s
+      retries: 10
+      start_period: 30s
+      timeout: 10s
     volumes:
       - ./config/metadata-scuba/config.json:/mnt/standalone_workdir/config.json:ro
     profiles:
@@ -94,9 +106,14 @@ services:
     restart: on-failure
     network_mode: host
     depends_on:
-      - vault
-      - metadata-scuba
-      - metadata-s3
+      vault:
+        condition: service_healthy
+      setup-scuba:
+        condition: service_completed_successfully
+      metadata-scuba:
+        condition: service_healthy
+      metadata-s3:
+        condition: service_healthy
     environment:
       SUPERVISORD_CONF: 'supervisord.conf'
     profiles:
