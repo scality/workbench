@@ -3,7 +3,7 @@ global:
 
 features:
   scuba:
-    enabled: false
+    enabled: true
     enable_service_user: true
 
   bucket_notifications:
