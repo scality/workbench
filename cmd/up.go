@@ -24,14 +24,10 @@ type UpCmd struct {
 }
 
 func (c *UpCmd) Run() error {
-	// check if env exists
-	envPath := filepath.Join(c.EnvDir, c.Name)
-	created := false
-	if _, err := os.Stat(envPath); os.IsNotExist(err) {
-		if _, err := createEnv(c.EnvDir, c.Name, c.Overwrite); err != nil {
-			return fmt.Errorf("failed to create environment: %w", err)
-		}
-		created = true
+	// Create or ensure environment is properly set up
+	envPath, err := createEnv(c.EnvDir, c.Name, c.Overwrite)
+	if err != nil {
+		return fmt.Errorf("failed to create/setup environment: %w", err)
 	}
 
 	cfgPath := filepath.Join(envPath, "config.yaml")
@@ -40,7 +36,7 @@ func (c *UpCmd) Run() error {
 		return err
 	}
 
-	if created || !c.NoConfigure {
+	if !c.NoConfigure {
 		if err := configureEnv(cfg, envPath); err != nil {
 			return fmt.Errorf("failed to configure environment: %w", err)
 		}

@@ -67,6 +67,19 @@ func createEnv(envDir string, name string, overwrite bool) (string, error) {
 		}
 	}
 
+	// Create .gitignore file
+	gitignorePath := filepath.Join(envPath, ".gitignore")
+	_, err = os.Stat(gitignorePath)
+	if err != nil && !os.IsNotExist(err) {
+		return "", fmt.Errorf("failed to check .gitignore file: %w", err)
+	}
+	if os.IsNotExist(err) || overwrite {
+		err := renderTemplateToFile(getTemplates(), "templates/global/gitignore", nil, gitignorePath)
+		if err != nil {
+			return "", err
+		}
+	}
+
 	// Template the docker-compose.yaml file
 	dockerComposePath := filepath.Join(envPath, "docker-compose.yaml")
 	_, err = os.Stat(dockerComposePath)
