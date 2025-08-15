@@ -3,10 +3,13 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"text/template"
+
+	"github.com/hashicorp/go-multierror"
 
 	"github.com/scality/workbench"
 )
@@ -93,4 +96,34 @@ func buildDockerComposeCommand(cfg Config, args ...string) []string {
 	}
 
 	return append(dockerComposeCmd, args...)
+}
+
+func copyFile(src, dest string) (err error) {
+	source, err := os.Open(src)
+	if err != nil {
+		return
+	}
+
+	defer func() {
+		inErr := source.Close()
+		if inErr != nil {
+			err = multierror.Append(err, inErr)
+		}
+	}()
+
+	destination, err := os.Create(dest)
+	if err != nil {
+		return
+	}
+
+	defer func() {
+		inErr := destination.Close()
+		if inErr != nil {
+			err = multierror.Append(err, inErr)
+		}
+	}()
+
+
+	_, err = io.Copy(destination, source)
+	return
 }
