@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -21,11 +22,14 @@ type UpCmd struct {
 	Detach      bool   `help:"Run containers in detached mode." short:"d"`
 	Build       bool   `help:"Build images before starting containers." short:"b"`
 	NoCache     bool   `help:"Do not use cache when building images." short:"c"`
+	WithConfig  string `help:"Path to a custom configuration file. Replaces the default config." type:"existingfile"`
+	WithDockerCompose string `help:"Path to a custom Docker Compose file. Replaces the default file." type:"existingfile"`
+
 }
 
 func (c *UpCmd) Run() error {
 	// Create or ensure environment is properly set up
-	envPath, err := createEnv(c.EnvDir, c.Name, c.Overwrite)
+	envPath, err := createEnv(c.EnvDir, c.Name, c.Overwrite, c.WithConfig, c.WithDockerCompose)
 	if err != nil {
 		return fmt.Errorf("failed to create/setup environment: %w", err)
 	}
@@ -67,7 +71,7 @@ func (c *UpCmd) Run() error {
 	cmd.Stderr = os.Stderr
 	cmd.Dir = filepath.Join(c.EnvDir, c.Name)
 	if err := cmd.Run(); err != nil {
-		if ctx.Err() == context.Canceled {
+		if errors.Is(ctx.Err(), context.Canceled)  {
 			return nil
 		}
 		return err
