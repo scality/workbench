@@ -17,7 +17,7 @@ type configGenFunc func(cfg Config, path string) error
 
 func (c *ConfigureCmd) Run() error {
 	envPath := filepath.Join(c.EnvDir, c.Name)
-	configPath := filepath.Join(envPath, "config.yaml")
+	configPath := filepath.Join(envPath, "values.yaml")
 
 	// Load the global configuration
 	cfg, err := LoadConfig(configPath)

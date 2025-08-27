@@ -22,7 +22,7 @@ func (c *LogsCmd) Run() error {
 	// check if env exists
 	envPath := filepath.Join(c.EnvDir, c.Name)
 
-	cfgPath := filepath.Join(envPath, "config.yaml")
+	cfgPath := filepath.Join(envPath, "values.yaml")
 	cfg, err := LoadConfig(cfgPath)
 	if err != nil {
 		return err
