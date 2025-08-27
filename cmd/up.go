@@ -15,16 +15,15 @@ import (
 )
 
 type UpCmd struct {
-	EnvDir      string `help:"Directory containing the environment." required:"" default:"./env"`
-	Name        string `help:"Name of the environment to start." required:"" short:"n" default:"default"`
-	NoConfigure bool   `help:"Don't template config files before starting containers"`
-	Overwrite   bool   `help:"Overwrite existing environment if it exists." short:"o"`
-	Detach      bool   `help:"Run containers in detached mode." short:"d"`
-	Build       bool   `help:"Build images before starting containers." short:"b"`
-	NoCache     bool   `help:"Do not use cache when building images." short:"c"`
-	WithConfig  string `help:"Path to a custom configuration file. Replaces the default config." type:"existingfile"`
+	EnvDir            string `help:"Directory containing the environment." required:"" default:"./env"`
+	Name              string `help:"Name of the environment to start." required:"" short:"n" default:"default"`
+	NoConfigure       bool   `help:"Don't template config files before starting containers"`
+	Overwrite         bool   `help:"Overwrite existing environment if it exists." short:"o"`
+	Detach            bool   `help:"Run containers in detached mode." short:"d"`
+	Build             bool   `help:"Build images before starting containers." short:"b"`
+	NoCache           bool   `help:"Do not use cache when building images." short:"c"`
+	WithConfig        string `help:"Path to a custom configuration file. Replaces the default config." type:"existingfile"`
 	WithDockerCompose string `help:"Path to a custom Docker Compose file. Replaces the default file." type:"existingfile"`
-
 }
 
 func (c *UpCmd) Run() error {
