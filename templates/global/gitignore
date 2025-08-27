@@ -1,5 +1,5 @@
 *
-!config.yaml
+!values.yaml
 
 # By default, docker-compose.yaml is ignored and generated automatically.
 # If you need to customize the docker-compose.yaml file for this environment:

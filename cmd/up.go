@@ -34,7 +34,7 @@ func (c *UpCmd) Run() error {
 		return fmt.Errorf("failed to create/setup environment: %w", err)
 	}
 
-	cfgPath := filepath.Join(envPath, "config.yaml")
+	cfgPath := filepath.Join(envPath, "values.yaml")
 	cfg, err := LoadConfig(cfgPath)
 	if err != nil {
 		return err
@@ -71,7 +71,7 @@ func (c *UpCmd) Run() error {
 	cmd.Stderr = os.Stderr
 	cmd.Dir = filepath.Join(c.EnvDir, c.Name)
 	if err := cmd.Run(); err != nil {
-		if errors.Is(ctx.Err(), context.Canceled)  {
+		if errors.Is(ctx.Err(), context.Canceled) {
 			return nil
 		}
 		return err

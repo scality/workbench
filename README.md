@@ -57,12 +57,12 @@ If no environment name is specified `default` is used.
 > ls env/
 default/
 > ls env/default/
-config/  config.yaml  defaults.env  docker-compose.yaml  logs/
+config/  values.yaml  defaults.env  docker-compose.yaml  logs/
 ```
 
 ### Configuration
 
-Each environment has a `config.yaml` that is used to enable features and configure individual components.
+Each environment has a `values.yaml` that is used to enable features and configure individual components.
 
 ```yaml
 global:

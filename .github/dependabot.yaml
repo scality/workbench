@@ -1,0 +1,33 @@
+---
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns:
+          - "*"
+        update-types:
+          - patch
+          - minor
+  - package-ecosystem: docker
+    directories:
+      - templates/global
+    schedule:
+      interval: weekly
+    ignore:
+      # Not ready to upgrade to latest version of cloudserver yet
+      - dependency-name: "scality/cloudserver"
+        update-types: ["version-update:semver-major"]
+      # Same story for utapi
+      - dependency-name: "scality/utapi"
+        update-types: ["version-update:semver-major"]
+    groups:
+      docker:
+        patterns:
+          - "*"
+        update-types:
+          - patch
+          - minor

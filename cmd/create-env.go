@@ -29,7 +29,7 @@ func (c *CreateEnvCmd) Run() error {
 			return fmt.Errorf("failed to load custom config: %w", err)
 		}
 	} else {
-		cfg, err = LoadConfig(filepath.Join(envPath, "config.yaml"))
+		cfg, err = LoadConfig(filepath.Join(envPath, "values.yaml"))
 		if err != nil {
 			return fmt.Errorf("failed to load config: %w", err)
 		}
@@ -64,7 +64,7 @@ func createEnv(envDir string, name string, overwrite bool, customConfig, customC
 		return "", err
 	}
 
-	configPath := filepath.Join(envPath, "config.yaml")
+	configPath := filepath.Join(envPath, "values.yaml")
 	_, err := os.Stat(configPath)
 	if err != nil && !os.IsNotExist(err) {
 		return "", fmt.Errorf("failed to check config file: %w", err)
@@ -80,7 +80,7 @@ func createEnv(envDir string, name string, overwrite bool, customConfig, customC
 				return "", fmt.Errorf("faled to copy custom config file: %w", err)
 			}
 		} else {
-			err := renderTemplateToFile(getTemplates(), "templates/global/config.yaml", nil, configPath)
+			err := renderTemplateToFile(getTemplates(), "templates/global/values.yaml", nil, configPath)
 			if err != nil {
 				return "", err
 			}
