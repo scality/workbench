@@ -17,13 +17,13 @@ features:
     enabled: false
 
 cloudserver:
-  image: ghcr.io/scality/cloudserver:7.70.62
+  image: ghcr.io/scality/cloudserver:7.70.77
 
 vault:
-  image: ghcr.io/scality/vault:7.73.0
+  image: ghcr.io/scality/vault:7.76.0
 
 backbeat:
-  image: ghcr.io/scality/backbeat:9.0.12-federation
+  image: ghcr.io/scality/backbeat:9.0.16-federation
 
 s3_metadata:
   image: ghcr.io/scality/metadata:8.12.0-standalone
@@ -38,10 +38,10 @@ kafka:
   image: bitnami/kafka:3.4.0
 
 zookeeper:
-  image: bitnami/zookeeper:3.8.1
+  image: bitnami/zookeeper:3.9.3
 
 redis:
   image: redis:7
 
 utapi:
-  image: ghcr.io/scality/utapi:7.70.7
+  image: ghcr.io/scality/utapi:7.70.9
