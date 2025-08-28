@@ -41,7 +41,7 @@ zookeeper:
   image: bitnami/zookeeper:3.8.1
 
 redis:
-  image: redis:7
+  image: redis:8
 
 utapi:
   image: ghcr.io/scality/utapi:7.70.7
