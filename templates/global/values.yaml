@@ -35,7 +35,7 @@ scuba_metadata:
   image: ghcr.io/scality/metadata:7.70.47-standalone
 
 kafka:
-  image: bitnami/kafka:3.4.0
+  image: bitnami/kafka:4.0.0
 
 zookeeper:
   image: bitnami/zookeeper:3.8.1
