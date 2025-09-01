@@ -123,7 +123,6 @@ func copyFile(src, dest string) (err error) {
 		}
 	}()
 
-
 	_, err = io.Copy(destination, source)
 	return
 }

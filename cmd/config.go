@@ -8,6 +8,41 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type RuntimeConfig struct {
+	EnvDir  string
+	EnvName string
+}
+
+const (
+	DefaultEnvDir  = "./env"
+	DefaultEnvName = "default"
+)
+
+func RuntimeConfigFromFlags(envDir, envName string) RuntimeConfig {
+	if envDir == "" {
+		v := os.Getenv("WORKBENCH_ENV_DIR")
+		if v != "" {
+			envDir = v
+		} else {
+			envDir = DefaultEnvDir
+		}
+	}
+
+	if envName == "" {
+		v := os.Getenv("WORKBENCH_ENV_NAME")
+		if v != "" {
+			envName = v
+		} else {
+			envName = DefaultEnvName
+		}
+	}
+
+	return RuntimeConfig{
+		EnvDir:  envDir,
+		EnvName: envName,
+	}
+}
+
 type Config struct {
 	Global        GlobalConfig      `yaml:"global"`
 	Features      FeatureConfig     `yaml:"features"`

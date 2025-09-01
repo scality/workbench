@@ -9,14 +9,15 @@ import (
 )
 
 type ConfigureCmd struct {
-	EnvDir string `help:"Directory to create the environment in." required:"" short:"d" default:"./env"`
-	Name   string `help:"Name of the environment to create." required:"" short:"n" default:"default"`
+	EnvDir string `help:"Directory to create the environment in. default: './env'" short:"d"`
+	Name   string `help:"Name of the environment to create. default: 'default'" short:"n"`
 }
 
 type configGenFunc func(cfg Config, path string) error
 
 func (c *ConfigureCmd) Run() error {
-	envPath := filepath.Join(c.EnvDir, c.Name)
+	rc := RuntimeConfigFromFlags(c.EnvDir, c.Name)
+	envPath := filepath.Join(rc.EnvDir, rc.EnvName)
 	configPath := filepath.Join(envPath, "values.yaml")
 
 	// Load the global configuration

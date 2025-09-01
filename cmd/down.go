@@ -13,14 +13,15 @@ import (
 )
 
 type DownCmd struct {
-	EnvDir  string `help:"Directory containing the environment." required:"" short:"d" default:"./env"`
-	Name    string `help:"Name of the environment to stop." required:"" short:"n" default:"default"`
+	EnvDir  string `help:"Directory containing the environment. default: './env'" short:"d"`
+	Name    string `help:"Name of the environment to stop. default: 'default'" short:"n"`
 	Timeout int    `help:"Timeout in seconds for stopping containers." short:"t" default:"10"`
 	Volumes bool   `help:"Remove named volumes declared in the 'volumes' section of the Compose file and anonymous volumes attached to containers." short:"v"`
 }
 
 func (c *DownCmd) Run() error {
-	envPath := filepath.Join(c.EnvDir, c.Name)
+	rc := RuntimeConfigFromFlags(c.EnvDir, c.Name)
+	envPath := filepath.Join(rc.EnvDir, rc.EnvName)
 	info, err := os.Stat(envPath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -53,7 +54,7 @@ func (c *DownCmd) Run() error {
 	cmd := exec.CommandContext(ctx, dockerComposeCmd[0], dockerComposeCmd[1:]...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	cmd.Dir = filepath.Join(c.EnvDir, c.Name)
+	cmd.Dir = envPath
 	if err := cmd.Run(); err != nil {
 		if errors.Is(ctx.Err(), context.Canceled) {
 			return nil

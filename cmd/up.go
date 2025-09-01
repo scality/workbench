@@ -15,8 +15,8 @@ import (
 )
 
 type UpCmd struct {
-	EnvDir            string `help:"Directory containing the environment." required:"" default:"./env"`
-	Name              string `help:"Name of the environment to start." required:"" short:"n" default:"default"`
+	EnvDir            string `help:"Directory containing the environment. default:'./env'"`
+	Name              string `help:"Name of the environment to start. default: 'default'" short:"n"`
 	NoConfigure       bool   `help:"Don't template config files before starting containers"`
 	Overwrite         bool   `help:"Overwrite existing environment if it exists." short:"o"`
 	Detach            bool   `help:"Run containers in detached mode." short:"d"`
@@ -28,7 +28,8 @@ type UpCmd struct {
 
 func (c *UpCmd) Run() error {
 	// Create or ensure environment is properly set up
-	envPath, err := createEnv(c.EnvDir, c.Name, c.Overwrite, c.WithConfig, c.WithDockerCompose)
+	rc := RuntimeConfigFromFlags(c.EnvDir, c.Name)
+	envPath, err := createEnv(rc.EnvDir, rc.EnvName, c.Overwrite, c.WithConfig, c.WithDockerCompose)
 	if err != nil {
 		return fmt.Errorf("failed to create/setup environment: %w", err)
 	}
@@ -68,7 +69,7 @@ func (c *UpCmd) Run() error {
 	cmd := exec.CommandContext(ctx, dockerComposeCmd[0], dockerComposeCmd[1:]...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	cmd.Dir = filepath.Join(c.EnvDir, c.Name)
+	cmd.Dir = envPath
 	if err := cmd.Run(); err != nil {
 		if errors.Is(ctx.Err(), context.Canceled) {
 			return nil
