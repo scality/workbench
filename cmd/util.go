@@ -51,7 +51,7 @@ func renderTemplateToFile(templates fs.FS, tmplPath string, data any, outPath st
 	return nil
 }
 
-func renderTemplates(cfg Config, srcDir, destDir string, templates []string) error {
+func renderTemplates(cfg EnvironmentConfig, srcDir, destDir string, templates []string) error {
 	templateFS := getTemplates()
 	for _, tmpl := range templates {
 		templatePath := filepath.Join(srcDir, tmpl)
@@ -63,7 +63,7 @@ func renderTemplates(cfg Config, srcDir, destDir string, templates []string) err
 	return nil
 }
 
-func getComposeProfiles(cfg Config) []string {
+func getComposeProfiles(cfg EnvironmentConfig) []string {
 	profiles := []string{"base"}
 
 	if cfg.Features.Scuba.Enabled {
@@ -81,7 +81,7 @@ func getComposeProfiles(cfg Config) []string {
 	return profiles
 }
 
-func buildDockerComposeCommand(cfg Config, args ...string) []string {
+func buildDockerComposeCommand(cfg EnvironmentConfig, args ...string) []string {
 	profiles := getComposeProfiles(cfg)
 
 	dockerComposeCmd := []string{

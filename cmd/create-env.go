@@ -23,14 +23,14 @@ func (c *CreateEnvCmd) Run() error {
 		return fmt.Errorf("failed to create environment: %w", err)
 	}
 
-	var cfg Config
+	var cfg EnvironmentConfig
 	if c.WithConfig != "" {
-		cfg, err = LoadConfig(c.WithConfig)
+		cfg, err = LoadEnvironmentConfig(c.WithConfig)
 		if err != nil {
 			return fmt.Errorf("failed to load custom config: %w", err)
 		}
 	} else {
-		cfg, err = LoadConfig(filepath.Join(envPath, "values.yaml"))
+		cfg, err = LoadEnvironmentConfig(filepath.Join(envPath, "values.yaml"))
 		if err != nil {
 			return fmt.Errorf("failed to load config: %w", err)
 		}

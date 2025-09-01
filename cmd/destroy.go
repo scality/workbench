@@ -35,7 +35,7 @@ func (c *DestroyCmd) Run() error {
 	}
 
 	cfgPath := filepath.Join(envPath, "values.yaml")
-	cfg, err := LoadConfig(cfgPath)
+	cfg, err := LoadEnvironmentConfig(cfgPath)
 	if err != nil {
 		return err
 	}

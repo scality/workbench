@@ -43,7 +43,7 @@ func RuntimeConfigFromFlags(envDir, envName string) RuntimeConfig {
 	}
 }
 
-type Config struct {
+type EnvironmentConfig struct {
 	Global        GlobalConfig      `yaml:"global"`
 	Features      FeatureConfig     `yaml:"features"`
 	Cloudserver   CloudserverConfig `yaml:"cloudserver"`
@@ -190,8 +190,8 @@ type RedisConfig struct {
 	LogLevel string `yaml:"log_level"`
 }
 
-func DefaultConfig() Config {
-	return Config{
+func DefaultEnvironmentConfig() EnvironmentConfig {
+	return EnvironmentConfig{
 		Global: GlobalConfig{
 			LogLevel: "info",
 			// Profile:  "default",
@@ -238,8 +238,8 @@ func DefaultConfig() Config {
 	}
 }
 
-func LoadConfig(path string) (Config, error) {
-	cfg := DefaultConfig()
+func LoadEnvironmentConfig(path string) (EnvironmentConfig, error) {
+	cfg := DefaultEnvironmentConfig()
 
 	if path == "" {
 		return cfg, nil
@@ -252,7 +252,7 @@ func LoadConfig(path string) (Config, error) {
 	}
 
 	// Parse the YAML into a temporary config
-	var fileCfg Config
+	var fileCfg EnvironmentConfig
 	if err := yaml.Unmarshal(data, &fileCfg); err != nil {
 		return cfg, fmt.Errorf("failed to parse config file: %w", err)
 	}

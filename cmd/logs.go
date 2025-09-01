@@ -24,7 +24,7 @@ func (c *LogsCmd) Run() error {
 	envPath := filepath.Join(rc.EnvDir, rc.EnvName)
 
 	cfgPath := filepath.Join(envPath, "values.yaml")
-	cfg, err := LoadConfig(cfgPath)
+	cfg, err := LoadEnvironmentConfig(cfgPath)
 	if err != nil {
 		return err
 	}
