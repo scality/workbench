@@ -9,27 +9,28 @@ import (
 )
 
 type CreateEnvCmd struct {
-	EnvDir            string `help:"Directory to create the environment in." required:"" short:"d" default:"./env"`
-	Name              string `help:"Name of the environment to create." required:"" short:"n" default:"default"`
+	EnvDir            string `help:"Directory to create the environment in. default: './env'" short:"d"`
+	Name              string `help:"Name of the environment to create. default: 'default'" short:"n"`
 	Overwrite         bool   `help:"Overwrite the environment if it already exists." short:"o"`
 	WithConfig        string `help:"Path to a custom configuration file. Replaces the default config." type:"existingfile"`
 	WithDockerCompose string `help:"Path to a custom Docker Compose file. Replaces the default file." type:"existingfile"`
 }
 
 func (c *CreateEnvCmd) Run() error {
-	envPath, err := createEnv(c.EnvDir, c.Name, c.Overwrite, c.WithConfig, c.WithDockerCompose)
+	rc := RuntimeConfigFromFlags(c.EnvDir, c.Name)
+	envPath, err := createEnv(rc.EnvDir, rc.EnvName, c.Overwrite, c.WithConfig, c.WithDockerCompose)
 	if err != nil {
 		return fmt.Errorf("failed to create environment: %w", err)
 	}
 
-	var cfg Config
+	var cfg EnvironmentConfig
 	if c.WithConfig != "" {
-		cfg, err = LoadConfig(c.WithConfig)
+		cfg, err = LoadEnvironmentConfig(c.WithConfig)
 		if err != nil {
 			return fmt.Errorf("failed to load custom config: %w", err)
 		}
 	} else {
-		cfg, err = LoadConfig(filepath.Join(envPath, "values.yaml"))
+		cfg, err = LoadEnvironmentConfig(filepath.Join(envPath, "values.yaml"))
 		if err != nil {
 			return fmt.Errorf("failed to load config: %w", err)
 		}

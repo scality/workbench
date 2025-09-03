@@ -9,18 +9,19 @@ import (
 )
 
 type ConfigureCmd struct {
-	EnvDir string `help:"Directory to create the environment in." required:"" short:"d" default:"./env"`
-	Name   string `help:"Name of the environment to create." required:"" short:"n" default:"default"`
+	EnvDir string `help:"Directory to create the environment in. default: './env'" short:"d"`
+	Name   string `help:"Name of the environment to create. default: 'default'" short:"n"`
 }
 
-type configGenFunc func(cfg Config, path string) error
+type configGenFunc func(cfg EnvironmentConfig, path string) error
 
 func (c *ConfigureCmd) Run() error {
-	envPath := filepath.Join(c.EnvDir, c.Name)
+	rc := RuntimeConfigFromFlags(c.EnvDir, c.Name)
+	envPath := filepath.Join(rc.EnvDir, rc.EnvName)
 	configPath := filepath.Join(envPath, "values.yaml")
 
 	// Load the global configuration
-	cfg, err := LoadConfig(configPath)
+	cfg, err := LoadEnvironmentConfig(configPath)
 	if err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
@@ -48,7 +49,7 @@ func createLogDirectories(envDir string) error {
 	return nil
 }
 
-func configureEnv(cfg Config, envDir string) error {
+func configureEnv(cfg EnvironmentConfig, envDir string) error {
 	log.Info().Msgf("Configuring environment %s", envDir)
 
 	if err := createLogDirectories(envDir); err != nil {
@@ -85,16 +86,16 @@ func configureEnv(cfg Config, envDir string) error {
 	return nil
 }
 
-func generateDefaultsEnv(cfg Config, envDir string) error {
+func generateDefaultsEnv(cfg EnvironmentConfig, envDir string) error {
 	defaultsEnvPath := filepath.Join(envDir, "defaults.env")
 	return renderTemplateToFile(getTemplates(), "templates/global/defaults.env", cfg, defaultsEnvPath)
 }
 
-func generateCloudserverConfig(cfg Config, path string) error {
+func generateCloudserverConfig(cfg EnvironmentConfig, path string) error {
 	return renderTemplateToFile(getTemplates(), "templates/cloudserver/config.json", cfg, filepath.Join(path, "cloudserver", "config.json"))
 }
 
-func generateBackbeatConfig(cfg Config, path string) error {
+func generateBackbeatConfig(cfg EnvironmentConfig, path string) error {
 	templates := []string{
 		"env",
 		"supervisord.conf",
@@ -106,7 +107,7 @@ func generateBackbeatConfig(cfg Config, path string) error {
 	return renderTemplates(cfg, "templates/backbeat", filepath.Join(path, "backbeat"), templates)
 }
 
-func generateVaultConfig(cfg Config, path string) error {
+func generateVaultConfig(cfg EnvironmentConfig, path string) error {
 	templates := []string{
 		"config.json",
 		"create-management-account.sh",
@@ -117,7 +118,7 @@ func generateVaultConfig(cfg Config, path string) error {
 	return renderTemplates(cfg, "templates/vault", filepath.Join(path, "vault"), templates)
 }
 
-func generateScubaConfig(cfg Config, path string) error {
+func generateScubaConfig(cfg EnvironmentConfig, path string) error {
 	templates := []string{
 		"config.json",
 		"create-service-user.sh",
@@ -132,17 +133,17 @@ func generateMetadataConfig(cfg MetadataConfig, path string) error {
 	return renderTemplateToFile(getTemplates(), "templates/metadata/config.json", cfg, filepath.Join(path, "config.json"))
 }
 
-func generateS3MetadataConfig(cfg Config, path string) error {
+func generateS3MetadataConfig(cfg EnvironmentConfig, path string) error {
 	cfgPath := filepath.Join(path, "metadata-s3")
 	return generateMetadataConfig(cfg.S3Metadata, cfgPath)
 }
 
-func generateScubaMetadataConfig(cfg Config, path string) error {
+func generateScubaMetadataConfig(cfg EnvironmentConfig, path string) error {
 	cfgPath := filepath.Join(path, "metadata-scuba")
 	return generateMetadataConfig(cfg.ScubaMetadata, cfgPath)
 }
 
-func generateKafkaConfig(cfg Config, path string) error {
+func generateKafkaConfig(cfg EnvironmentConfig, path string) error {
 	templates := []string{
 		"Dockerfile",
 		"setup.sh",
@@ -155,6 +156,6 @@ func generateKafkaConfig(cfg Config, path string) error {
 	return renderTemplates(cfg, "templates/kafka", filepath.Join(path, "kafka"), templates)
 }
 
-func generateUtapiConfig(cfg Config, path string) error {
+func generateUtapiConfig(cfg EnvironmentConfig, path string) error {
 	return renderTemplateToFile(getTemplates(), "templates/utapi/config.json", cfg, filepath.Join(path, "utapi", "config.json"))
 }

@@ -13,17 +13,18 @@ import (
 )
 
 type LogsCmd struct {
-	EnvDir string `help:"Directory containing the environment." required:"" default:"./env"`
-	Name   string `help:"Name of the environment to start." required:"" short:"n" default:"default"`
+	EnvDir string `help:"Directory containing the environment. default: './env'" short:"d"`
+	Name   string `help:"Name of the environment to retrieve logs for. default: 'default'" short:"n"`
 	Follow bool   `help:"Follow log output." short:"f"`
 }
 
 func (c *LogsCmd) Run() error {
 	// check if env exists
-	envPath := filepath.Join(c.EnvDir, c.Name)
+	rc := RuntimeConfigFromFlags(c.EnvDir, c.Name)
+	envPath := filepath.Join(rc.EnvDir, rc.EnvName)
 
 	cfgPath := filepath.Join(envPath, "values.yaml")
-	cfg, err := LoadConfig(cfgPath)
+	cfg, err := LoadEnvironmentConfig(cfgPath)
 	if err != nil {
 		return err
 	}
@@ -44,10 +45,9 @@ func (c *LogsCmd) Run() error {
 	cmd := exec.CommandContext(ctx, dockerComposeCmd[0], dockerComposeCmd[1:]...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	cmd.Dir = filepath.Join(c.EnvDir, c.Name)
-
+	cmd.Dir = envPath
 	if err := cmd.Run(); err != nil {
-		if errors.Is(ctx.Err(), context.Canceled)  {
+		if errors.Is(ctx.Err(), context.Canceled) {
 			return nil
 		}
 		return err
