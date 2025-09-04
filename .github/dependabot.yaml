@@ -24,6 +24,8 @@ updates:
       # Same story for utapi
       - dependency-name: "scality/utapi"
         update-types: ["version-update:semver-major"]
+      - dependency-name: "redis"
+        update-types: ["version-update:semver-major"]
     groups:
       docker:
         patterns:
