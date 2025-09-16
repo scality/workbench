@@ -4,14 +4,23 @@
         "logLevel": "info",
         "dumpLevel": "info"
     },
+    "retry": {
+        "minDelayMs": 100,
+        "maxDelayMs": 1000,
+        "backoffFactor": 2,
+        "maxRetryAttempts": 10
+    },
     "queryServer": {
         "enable": false,
         "port": 18100,
         "listenOn": "127.0.0.1",
-        "retryDelayMs": 1000,
-        "maxRetryDelayMs": 1000,
         "validator": true,
-        "maxRetryCount": 10
+        "retry": {
+            "minDelayMs": 100,
+            "maxDelayMs": 2000,
+            "backoffFactor": 2,
+            "maxRetryAttempts": 4
+        }
     },
     "ingestDaemon": {
         "enable": false,
@@ -31,9 +40,6 @@
         "host": "127.0.0.1",
         "port": 9000,
         "refreshPeriodMs": 5000,
-        "retryDelayMs": 1000,
-        "maxRetryDelayMs": 30000,
-        "maxRetryCount": 10,
         "maxRecordsPerRequest": 1000
     },
     "storageBackend": {
@@ -49,9 +55,7 @@
     "repair": {
         "enableAutoRepair": true,
         "maxPagesBeforeSave": 100,
-        "maxRecordsPerRequest": 10,
-        "maxRetryDelayMs": 1000,
-        "maxRetryCount": 10
+        "maxRecordsPerRequest": 10
     },
     "downsampleDaemon": {
         "enable": false,
