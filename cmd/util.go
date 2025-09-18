@@ -78,6 +78,10 @@ func getComposeProfiles(cfg EnvironmentConfig) []string {
 		profiles = append(profiles, "feature-utapi")
 	}
 
+	if cfg.Features.Migration.Enabled {
+		profiles = append(profiles, "feature-migration")
+	}
+
 	return profiles
 }
 
