@@ -1,0 +1,21 @@
+---
+backend:
+  production-bucketd-url: 'http://localhost:9000'
+  migration-bucketd-url: 'http://localhost:9001'
+  redis:
+    url: "redis://localhost:6379"
+worker:
+  switch:
+    all-production-bucketd-urls:
+      - 'http://localhost:9000'
+api-server:
+  listen-address: '0.0.0.0'
+  listen-port: 9180
+  metrics-server:
+    enabled: true
+    listen-address: '0.0.0.0'
+    listen-port: 9181
+    expose-job-specific-metrics: true
+  authorized-client-ips:
+    - 127.0.0.1
+    - ::1
