@@ -44,18 +44,19 @@ func RuntimeConfigFromFlags(envDir, envName string) RuntimeConfig {
 }
 
 type EnvironmentConfig struct {
-	Global        GlobalConfig      `yaml:"global"`
-	Features      FeatureConfig     `yaml:"features"`
-	Cloudserver   CloudserverConfig `yaml:"cloudserver"`
-	S3Metadata    MetadataConfig    `yaml:"s3_metadata"`
-	Backbeat      BackbeatConfig    `yaml:"backbeat"`
-	Vault         VaultConfig       `yaml:"vault"`
-	Scuba         ScubaConfig       `yaml:"scuba"`
-	ScubaMetadata MetadataConfig    `yaml:"scuba_metadata"`
-	Kafka         KafkaConfig       `yaml:"kafka"`
-	Zookeeper     ZookeeperConfig   `yaml:"zookeeper"`
-	Redis         RedisConfig       `yaml:"redis"`
-	Utapi         UtapiConfig       `yaml:"utapi"`
+	Global         GlobalConfig         `yaml:"global"`
+	Features       FeatureConfig        `yaml:"features"`
+	Cloudserver    CloudserverConfig    `yaml:"cloudserver"`
+	S3Metadata     MetadataConfig       `yaml:"s3_metadata"`
+	Backbeat       BackbeatConfig       `yaml:"backbeat"`
+	Vault          VaultConfig          `yaml:"vault"`
+	Scuba          ScubaConfig          `yaml:"scuba"`
+	ScubaMetadata  MetadataConfig       `yaml:"scuba_metadata"`
+	Kafka          KafkaConfig          `yaml:"kafka"`
+	Zookeeper      ZookeeperConfig      `yaml:"zookeeper"`
+	Redis          RedisConfig          `yaml:"redis"`
+	Utapi          UtapiConfig          `yaml:"utapi"`
+	MigrationTools MigrationToolsConfig `yaml:"migration_tools"`
 }
 
 type GlobalConfig struct {
@@ -67,6 +68,7 @@ type FeatureConfig struct {
 	Scuba               ScubaFeatureConfig               `yaml:"scuba"`
 	BucketNotifications BucketNotificationsFeatureConfig `yaml:"bucket_notifications"`
 	Utapi               UtapiFeatureConfig               `yaml:"utapi"`
+	Migration           MigrationFeatureConfig           `yaml:"migration"`
 }
 
 type ScubaFeatureConfig struct {
@@ -87,6 +89,10 @@ type UtapiFeatureConfig struct {
 	Enabled bool `yaml:"enabled"`
 }
 
+type MigrationFeatureConfig struct {
+	Enabled bool `yaml:"enabled"`
+}
+
 type CloudserverConfig struct {
 	Image                       string `yaml:"image"`
 	EnableNullVersionCompatMode bool   `yaml:"enableNullVersionCompatMode"`
@@ -104,6 +110,11 @@ type VaultConfig struct {
 }
 
 type UtapiConfig struct {
+	Image    string `yaml:"image"`
+	LogLevel string `yaml:"log_level"`
+}
+
+type MigrationToolsConfig struct {
 	Image    string `yaml:"image"`
 	LogLevel string `yaml:"log_level"`
 }
@@ -157,17 +168,23 @@ const (
 )
 
 type MetadataConfig struct {
-	Image        string       `yaml:"image"`
-	RaftSessions int          `yaml:"raft_sessions"`
-	BasePorts    MdPortConfig `yaml:"base_ports"`
-	LogLevel     string       `yaml:"log_level"`
-	VFormat      VFormat      `yaml:"vformat"`
+	Image        string           `yaml:"image"`
+	RaftSessions int              `yaml:"raft_sessions"`
+	BasePorts    MdPortConfig     `yaml:"base_ports"`
+	LogLevel     string           `yaml:"log_level"`
+	VFormat      VFormat          `yaml:"vformat"`
+	Migration    *MigrationConfig `yaml:"migration"`
 }
 
 type MdPortConfig struct {
 	Bucketd   uint16 `yaml:"bucketd"`
 	Repd      uint16 `yaml:"repd"`
 	RepdAdmin uint16 `yaml:"repdAdmin"`
+}
+
+type MigrationConfig struct {
+	Deploy    bool         `yaml:"deploy"`
+	BasePorts MdPortConfig `yaml:"base_ports"`
 }
 
 type ScubaConfig struct {
@@ -209,6 +226,9 @@ func DefaultEnvironmentConfig() EnvironmentConfig {
 			Utapi: UtapiFeatureConfig{
 				Enabled: false,
 			},
+			Migration: MigrationFeatureConfig{
+				Enabled: false,
+			},
 		},
 		Cloudserver: CloudserverConfig{},
 		S3Metadata: MetadataConfig{
@@ -220,6 +240,14 @@ func DefaultEnvironmentConfig() EnvironmentConfig {
 			},
 			RaftSessions: 3,
 			// LogLevel:     "info",
+			Migration: &MigrationConfig{
+				Deploy: false,
+				BasePorts: MdPortConfig{
+					Bucketd:   9001,
+					Repd:      4700,
+					RepdAdmin: 4750,
+				},
+			},
 		},
 		Backbeat: BackbeatConfig{},
 		Vault:    VaultConfig{},
@@ -234,7 +262,8 @@ func DefaultEnvironmentConfig() EnvironmentConfig {
 			RaftSessions: 1,
 			// LogLevel:     "info",
 		},
-		Utapi: UtapiConfig{},
+		Utapi:          UtapiConfig{},
+		MigrationTools: MigrationToolsConfig{},
 	}
 }
 
@@ -270,6 +299,10 @@ func LoadEnvironmentConfig(path string) (EnvironmentConfig, error) {
 	if cfg.S3Metadata.LogLevel == "" {
 		cfg.S3Metadata.LogLevel = cfg.Global.LogLevel
 	}
+	// deploy the migration metadata map and bucketds if enabled
+	if cfg.Features.Migration.Enabled {
+		cfg.S3Metadata.Migration.Deploy = true
+	}
 
 	if cfg.Backbeat.LogLevel == "" {
 		cfg.Backbeat.LogLevel = cfg.Global.LogLevel
@@ -297,6 +330,14 @@ func LoadEnvironmentConfig(path string) (EnvironmentConfig, error) {
 
 	if cfg.Redis.LogLevel == "" {
 		cfg.Redis.LogLevel = cfg.Global.LogLevel
+	}
+
+	if cfg.Utapi.LogLevel == "" {
+		cfg.Utapi.LogLevel = cfg.Global.LogLevel
+	}
+
+	if cfg.MigrationTools.LogLevel == "" {
+		cfg.MigrationTools.LogLevel = cfg.Global.LogLevel
 	}
 
 	return cfg, nil

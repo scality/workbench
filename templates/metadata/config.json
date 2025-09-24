@@ -8,8 +8,23 @@
         "repd": {{ .BasePorts.Repd }},
         "repdAdmin": {{ .BasePorts.RepdAdmin }}
     },
-    "logLevel": "{{ .LogLevel }}",
     "env": {
         "METADATA_NEW_BUCKETS_VFORMAT": "{{ .VFormat }}"
-    }
+    },
+    {{ if .Migration }}
+    "migration": {
+        "deploy": {{ .Migration.Deploy }},
+        "raftSessions": 0,
+        "raftMembers": 5,
+        "bucketdCount": 1,
+        "bucketdWorkers": 1,
+        "basePorts": {
+            "bucketd": {{ .Migration.BasePorts.Bucketd }},
+            "repd": {{ .Migration.BasePorts.Repd }},
+            "repdAdmin": {{ .Migration.BasePorts.RepdAdmin }}
+        },
+        "logLevel": "info"
+    },
+    {{ end }}
+    "logLevel": "{{ .LogLevel }}"
 }

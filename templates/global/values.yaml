@@ -16,6 +16,9 @@ features:
   utapi:
     enabled: false
 
+  migration:
+    enabled: false
+
 cloudserver:
   image: ghcr.io/scality/cloudserver:7.70.77
 
@@ -45,3 +48,6 @@ redis:
 
 utapi:
   image: ghcr.io/scality/utapi:7.70.9
+
+migration_tools:
+  image: ghcr.io/scality/metadata-migration:1.4.0-svc-base
