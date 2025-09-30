@@ -161,10 +161,17 @@ services:
     image: ${REDIS_IMAGE}
     container_name: workbench-redis
     network_mode: host
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 10s
+      retries: 10
+      start_period: 30s
+      timeout: 10s
     profiles:
       - feature-crr
       - feature-notifications
       - feature-utapi
+      - feature-migration
 
   zookeeper:
     build:
@@ -254,3 +261,23 @@ services:
       - ./config/utapi/config.json:/conf/config.json:ro
     environment:
       UTAPI_CONFIG_FILE: /conf/config.json
+
+  migration-tools:
+    image: ${MIGRATION_TOOLS_IMAGE}
+    container_name: workbench-migration-tools
+    network_mode: host
+    depends_on:
+      metadata-s3:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SUPERVISORD_CONF: supervisord.conf
+      MIGRATION_CONFIG_FILE: /conf/migration.yml
+    volumes:
+      - ./config/migration-tools/supervisord.conf:/conf/supervisord.conf:ro
+      - ./config/migration-tools/migration.yml:/conf/migration.yml:ro
+      - ./config/migration-tools/env:/conf/env:ro
+      - ./logs/migration-tools:/logs:rw
+    profiles:
+      - feature-migration

@@ -39,6 +39,7 @@ func createLogDirectories(envDir string) error {
 		filepath.Join(envDir, "logs"),
 		filepath.Join(envDir, "logs", "scuba"),
 		filepath.Join(envDir, "logs", "backbeat"),
+		filepath.Join(envDir, "logs", "migration-tools"),
 	}
 
 	for _, dir := range logDirs {
@@ -69,6 +70,7 @@ func configureEnv(cfg EnvironmentConfig, envDir string) error {
 		generateScubaMetadataConfig,
 		generateKafkaConfig,
 		generateUtapiConfig,
+		generateMigrationToolsConfig,
 	}
 
 	configDir := filepath.Join(envDir, "config")
@@ -158,4 +160,14 @@ func generateKafkaConfig(cfg EnvironmentConfig, path string) error {
 
 func generateUtapiConfig(cfg EnvironmentConfig, path string) error {
 	return renderTemplateToFile(getTemplates(), "templates/utapi/config.json", cfg, filepath.Join(path, "utapi", "config.json"))
+}
+
+func generateMigrationToolsConfig(cfg EnvironmentConfig, path string) error {
+	templates := []string{
+		"supervisord.conf",
+		"migration.yml",
+		"env",
+	}
+
+	return renderTemplates(cfg, "templates/migration-tools", filepath.Join(path, "migration-tools"), templates)
 }
