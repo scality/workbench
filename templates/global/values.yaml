@@ -29,13 +29,13 @@ backbeat:
   image: ghcr.io/scality/backbeat:9.1.0-federation
 
 s3_metadata:
-  image: ghcr.io/scality/metadata:8.13.0-standalone
+  image: ghcr.io/scality/metadata:8.14.0-standalone
 
 scuba:
   image: ghcr.io/scality/scuba:1.1.13-nodesvc-base
 
 scuba_metadata:
-  image: ghcr.io/scality/metadata:8.13.0-standalone
+  image: ghcr.io/scality/metadata:8.14.0-standalone
 
 kafka:
   image: bitnami/kafka:3.4.0
