@@ -94,7 +94,35 @@ func generateDefaultsEnv(cfg EnvironmentConfig, envDir string) error {
 }
 
 func generateCloudserverConfig(cfg EnvironmentConfig, path string) error {
-	return renderTemplateToFile(getTemplates(), "templates/cloudserver/config.json", cfg, filepath.Join(path, "cloudserver", "config.json"))
+	version := detectCloudserverVersion(cfg.Cloudserver.Image)
+
+	configTemplate := fmt.Sprintf("templates/cloudserver/config-%s.json", version)
+
+	if f, err := getTemplates().Open(configTemplate); err != nil {
+		return fmt.Errorf("no configuration template found for cloudserver version %s (image: %s): %w",
+			version, cfg.Cloudserver.Image, err)
+	} else {
+		if closeErr := f.Close(); closeErr != nil {
+			return fmt.Errorf("failed to close template file: %w", closeErr)
+		}
+	}
+
+	err := renderTemplateToFile(
+		getTemplates(),
+		configTemplate,
+		cfg,
+		filepath.Join(path, "cloudserver", "config.json"),
+	)
+	if err != nil {
+		return err
+	}
+
+	return renderTemplateToFile(
+		getTemplates(),
+		"templates/cloudserver/locationConfig.json",
+		cfg,
+		filepath.Join(path, "cloudserver", "locationConfig.json"),
+	)
 }
 
 func generateBackbeatConfig(cfg EnvironmentConfig, path string) error {
