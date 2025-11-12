@@ -7,6 +7,8 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"text/template"
 
 	"github.com/hashicorp/go-multierror"
@@ -129,4 +131,39 @@ func copyFile(src, dest string) (err error) {
 
 	_, err = io.Copy(destination, source)
 	return
+}
+
+// detectCloudserverVersion extracts the major version from a cloudserver image tag.
+// Returns "v7" for version 7.x images, "v9" for version 9+ images
+// Defaults to "v9" for non-numeric tags (latest, dev, etc.) or when version cannot be determined.
+func detectCloudserverVersion(image string) string {
+	parts := strings.Split(image, ":")
+	if len(parts) < 2 || parts[1] == "" {
+		return "v9"
+	}
+
+	tag := parts[1]
+
+	if len(tag) > 0 && tag[0] >= '0' && tag[0] <= '9' {
+		// Find where the first non-digit character appears
+		endIdx := 0
+		for endIdx < len(tag) && tag[endIdx] >= '0' && tag[endIdx] <= '9' {
+			endIdx++
+		}
+
+		if endIdx > 0 {
+			majorVersionStr := tag[0:endIdx]
+			if majorVersion, err := strconv.Atoi(majorVersionStr); err == nil {
+				if majorVersion == 7 {
+					return "v7"
+				}
+				if majorVersion >= 9 {
+					return "v9"
+				}
+			}
+		}
+	}
+
+	// Default to v9 for non-numeric tags (latest, dev, etc.)
+	return "v9"
 }
