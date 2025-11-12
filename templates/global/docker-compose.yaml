@@ -45,6 +45,7 @@ services:
     command: node dataserver.js
     volumes:
       - ./config/cloudserver/config.json:/conf/config.json:ro
+      - ./config/cloudserver/locationConfig.json:/conf/locationConfig.json:ro
     profiles:
       - base
 
@@ -63,6 +64,7 @@ services:
       ENABLE_NULL_VERSION_COMPAT_MODE: ${CLOUDSERVER_ENABLE_NULL_VERSION_COMPAT_MODE}
     volumes:
       - ./config/cloudserver/config.json:/conf/config.json:ro
+      - ./config/cloudserver/locationConfig.json:/conf/locationConfig.json:ro
     profiles:
       - base
 
