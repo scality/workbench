@@ -20,7 +20,7 @@ features:
     enabled: false
 
 cloudserver:
-  image: ghcr.io/scality/cloudserver:9.0.32-federation
+  image: ghcr.io/scality/cloudserver:9.0.32
 
 vault:
   image: ghcr.io/scality/vault:7.81.0
