@@ -45,6 +45,7 @@ services:
     command: node dataserver.js
     volumes:
       - ./config/cloudserver/config.json:/conf/config.json:ro
+      - ./config/cloudserver/locationConfig.json:/conf/locationConfig.json:ro
     profiles:
       - base
 
@@ -61,8 +62,10 @@ services:
       S3_CONFIG_FILE: /conf/config.json
       MPU_TESTING: 'yes'
       ENABLE_NULL_VERSION_COMPAT_MODE: ${CLOUDSERVER_ENABLE_NULL_VERSION_COMPAT_MODE}
+      REMOTE_MANAGEMENT_DISABLE: true
     volumes:
       - ./config/cloudserver/config.json:/conf/config.json:ro
+      - ./config/cloudserver/locationConfig.json:/conf/locationConfig.json:ro
     profiles:
       - base
 
