@@ -20,22 +20,22 @@ features:
     enabled: false
 
 cloudserver:
-  image: ghcr.io/scality/cloudserver:9.2.4
+  image: ghcr.io/scality/cloudserver:9.2.6
 
 vault:
   image: ghcr.io/scality/vault:7.83.0
 
 backbeat:
-  image: ghcr.io/scality/backbeat:9.1.2-federation
+  image: ghcr.io/scality/backbeat:9.1.3-federation
 
 s3_metadata:
-  image: ghcr.io/scality/metadata:8.21.0-standalone
+  image: ghcr.io/scality/metadata:8.22.0-standalone
 
 scuba:
   image: ghcr.io/scality/scuba:1.1.17-nodesvc-base
 
 scuba_metadata:
-  image: ghcr.io/scality/metadata:8.21.0-standalone
+  image: ghcr.io/scality/metadata:8.22.0-standalone
 
 kafka:
   image: bitnami/kafka:3.4.0
