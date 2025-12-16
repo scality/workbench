@@ -39,7 +39,7 @@ if [[ -n "$TOPICS_TO_CREATE" ]]; then
     done
 fi
 
-if [[ "$CREATE_NOTIFICATION_PATHS" == "true" ]]; then
+if [[ "$CREATE_ZOOKEEPER_PATHS" == "true" ]]; then
     if [[ -z "$ZOOKEEPER_ENDPOINT" ]]; then
         echo "[setup] Zookeeper endpoint not set"
         exit 1
@@ -56,6 +56,14 @@ create /bucket-notification/raft-id-dispatcher/provisions
 create /bucket-notification/raft-id-dispatcher/provisions/1
 create /bucket-notification/raft-id-dispatcher/provisions/2
 create /bucket-notification/raft-id-dispatcher/provisions/3
+create /queue-populator
+create /queue-populator/raft-id-dispatcher
+create /queue-populator/raft-id-dispatcher/owners
+create /queue-populator/raft-id-dispatcher/leaders
+create /queue-populator/raft-id-dispatcher/provisions
+create /queue-populator/raft-id-dispatcher/provisions/0
+create /queue-populator/raft-id-dispatcher/provisions/1
+create /queue-populator/raft-id-dispatcher/provisions/2
 quit
 EOF
     echo "[setup] Zookeeper paths created."

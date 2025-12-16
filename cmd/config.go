@@ -65,10 +65,11 @@ type GlobalConfig struct {
 }
 
 type FeatureConfig struct {
-	Scuba               ScubaFeatureConfig               `yaml:"scuba"`
-	BucketNotifications BucketNotificationsFeatureConfig `yaml:"bucket_notifications"`
-	Utapi               UtapiFeatureConfig               `yaml:"utapi"`
-	Migration           MigrationFeatureConfig           `yaml:"migration"`
+	Scuba                  ScubaFeatureConfig               `yaml:"scuba"`
+	BucketNotifications    BucketNotificationsFeatureConfig `yaml:"bucket_notifications"`
+	CrossRegionReplication CrossRegionReplicationFeatureConfig `yaml:"cross_region_replication"`
+	Utapi                  UtapiFeatureConfig               `yaml:"utapi"`
+	Migration              MigrationFeatureConfig           `yaml:"migration"`
 }
 
 type ScubaFeatureConfig struct {
@@ -83,6 +84,10 @@ type BucketNotificationsFeatureConfig struct {
 		Username string `yaml:"username"`
 		Password string `yaml:"password"`
 	} `yaml:"destinationAuth"`
+}
+
+type CrossRegionReplicationFeatureConfig struct {
+	Enabled bool `yaml:"enabled"`
 }
 
 type UtapiFeatureConfig struct {
@@ -227,6 +232,9 @@ func DefaultEnvironmentConfig() EnvironmentConfig {
 				Enabled: false,
 			},
 			Migration: MigrationFeatureConfig{
+				Enabled: false,
+			},
+			CrossRegionReplication: CrossRegionReplicationFeatureConfig{
 				Enabled: false,
 			},
 		},
