@@ -49,12 +49,17 @@
             "destination": {
                 "transport": "http",
                 "bootstrapList": [
-                    { "site": "sf", "servers": ["127.0.0.1:9443"], "echo": false },
+                    { "site": "sf", "servers": ["127.0.0.1:8001"], "echo": false },
                     { "site": "aws-location", "type": "aws_s3" }
                 ],
                 "auth": {
-                    "type": "account",
-                    "account": "lisa"
+                    "type": "service",
+                    "account": "service-replication",
+                    "vault": {
+                        "host": "127.0.0.1",
+                        "port": 8500,
+                        "adminPort": 8600
+                    }
                 }
             },
             "topic": "backbeat-replication",
