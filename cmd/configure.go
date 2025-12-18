@@ -132,8 +132,6 @@ func generateBackbeatConfig(cfg EnvironmentConfig, path string) error {
 		"config.json",
 		"config.notification.json",
 		"notificationCredentials.json",
-		"create-service-user.sh",
-		"Dockerfile.setup",
 	}
 
 	return renderTemplates(cfg, "templates/backbeat", filepath.Join(path, "backbeat"), templates)
