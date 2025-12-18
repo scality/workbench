@@ -15,12 +15,6 @@ type ConfigureCmd struct {
 
 type configGenFunc func(cfg EnvironmentConfig, path string) error
 
-type CloudserverTemplateData struct {
-	EnvironmentConfig
-	Port int
-	MetricsPort int
-}
-
 func (c *ConfigureCmd) Run() error {
 	rc := RuntimeConfigFromFlags(c.EnvDir, c.Name)
 	envPath := filepath.Join(rc.EnvDir, rc.EnvName)
@@ -113,40 +107,14 @@ func generateCloudserverConfig(cfg EnvironmentConfig, path string) error {
 		}
 	}
 
-	// Render the main config.json with port 8000
-	templateData := CloudserverTemplateData{
-		EnvironmentConfig: cfg,
-		Port:              8000,
-		MetricsPort:       8002,
-	}
-
 	err := renderTemplateToFile(
 		getTemplates(),
 		configTemplate,
-		templateData,
+		cfg,
 		filepath.Join(path, "cloudserver", "config.json"),
 	)
 	if err != nil {
 		return err
-	}
-
-	// Render config-destination.json with port 8001 if CRR is enabled
-	if cfg.Features.CrossRegionReplication.Enabled {
-		destTemplateData := CloudserverTemplateData{
-			EnvironmentConfig: cfg,
-			Port:              8001,
-			MetricsPort:       8003,
-		}
-
-		err = renderTemplateToFile(
-			getTemplates(),
-			configTemplate,
-			destTemplateData,
-			filepath.Join(path, "cloudserver", "config-destination.json"),
-		)
-		if err != nil {
-			return err
-		}
 	}
 
 	return renderTemplateToFile(

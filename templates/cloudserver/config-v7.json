@@ -1,7 +1,7 @@
 {
-    "port": {{ .Port }},
+    "port": 8000,
     "listenOn": [],
-    "metricsPort": {{ .MetricsPort }},
+    "metricsPort": 8002,
     "replicationGroupId": "RG001",
     "restEndpoints": {
         "localhost": "us-east-1",

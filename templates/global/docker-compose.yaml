@@ -69,26 +69,6 @@ services:
     profiles:
       - base
 
-  cloudserver-destination:
-    image: ${CLOUDSERVER_IMAGE}
-    container_name: workbench-s3-destination
-    network_mode: host
-    command: node index.js
-    environment:
-      S3DATA: file
-      S3METADATA: scality
-      S3VAULT: scality
-      BUCKETD_BOOTSTRAP: localhost:9000
-      S3_CONFIG_FILE: /conf/config.json
-      MPU_TESTING: 'yes'
-      ENABLE_NULL_VERSION_COMPAT_MODE: ${CLOUDSERVER_ENABLE_NULL_VERSION_COMPAT_MODE}
-      REMOTE_MANAGEMENT_DISABLE: true
-    volumes:
-      - ./config/cloudserver/config-destination.json:/conf/config.json:ro
-      - ./config/cloudserver/locationConfig.json:/conf/locationConfig.json:ro
-    profiles:
-      - feature-crr
-
   vault:
     image: ${VAULT_IMAGE}
     container_name: workbench-vault
@@ -170,12 +150,16 @@ services:
     environment:
       SUPERVISORD_CONF: supervisord.conf
       BACKBEAT_CONFIG_FILE: /conf/config.json
+    depends_on:
+      setup-backbeat:
+        condition: service_completed_successfully
     volumes:
       - ./config/backbeat/supervisord.conf:/conf/supervisord.conf:ro
       - ./config/backbeat/config.json:/conf/config.json:ro
       - ./config/backbeat/config.notification.json:/conf/config.notification.json:ro
       - ./config/backbeat/env:/conf/env:ro
       - ./logs/backbeat:/logs
+      - ./config/vault/:/secrets/:rw
     profiles:
       - feature-crr
       - feature-notifications
@@ -250,7 +234,15 @@ services:
     network_mode: host
     environment:
       KAFKA_PORT: '9092'
-      TOPICS_TO_CREATE: backbeat-lifecycle-bucket-tasks backbeat-lifecycle-object-tasks backbeat-bucket-notification backbeat-replications backbeat-replication-status
+      TOPICS_TO_CREATE: >
+        backbeat-lifecycle-bucket-tasks
+        backbeat-lifecycle-object-tasks
+        backbeat-bucket-notification
+        backbeat-replication
+        backbeat-data-mover
+        backbeat-replication-status
+        backbeat-replication-failed
+        backbeat-metrics-group-crr
       CREATE_ZOOKEEPER_PATHS: 'true'
       ZOOKEEPER_ENDPOINT: 127.0.0.1:2181/backbeat
     depends_on:

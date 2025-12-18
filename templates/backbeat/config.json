@@ -23,6 +23,14 @@
             "host": "127.0.0.1",
             "port": 9000
         },
+        "mongo": {
+            "replicaSetHosts":
+                "localhost:27017,localhost:27018,localhost:27019",
+            "writeConcern": "majority",
+            "replicaSet": "rs0",
+            "readPreference": "primary",
+            "database": "metadata"
+        },
         "probeServer": {
             "bindAddress": "localhost",
             "port": 4042
@@ -37,32 +45,32 @@
                     "port": 8000
                 },
                 "auth": {
-                    "type": "account",
-                    "account": "bart",
+                    "type": "role",
                     "vault": {
                         "host": "127.0.0.1",
                         "port": 8500,
-                        "adminPort": 8600
+                        "adminPort": 8600,
+                        "adminCredentialsFile": "/home/scality/backbeat/node_modules/vaultclient/tests/utils/admincredentials.json"
                     }
                 }
             },
             "destination": {
                 "transport": "http",
                 "bootstrapList": [
-                    { "site": "sf", "servers": ["127.0.0.1:8001"], "echo": false },
-                    { "site": "aws-location", "type": "aws_s3" }
+                    { "site": "sf", "servers": ["127.0.0.1:8000"], "echo": false }
                 ],
                 "auth": {
-                    "type": "service",
-                    "account": "service-replication",
+                    "type": "role",
                     "vault": {
                         "host": "127.0.0.1",
                         "port": 8500,
-                        "adminPort": 8600
+                        "adminPort": 8600,
+                        "adminCredentialsFile": "/home/scality/backbeat/node_modules/vaultclient/tests/utils/admincredentials.json"
                     }
                 }
             },
             "topic": "backbeat-replication",
+            "dataMoverTopic": "backbeat-data-mover",
             "replicationStatusTopic": "backbeat-replication-status",
             "replicationFailedTopic": "backbeat-replication-failed",
             "monitorReplicationFailures": true,
@@ -75,26 +83,58 @@
             ],
             "queueProcessor": {
                 "groupId": "backbeat-replication-group",
-                "retryTimeoutS": 300,
+                "retry": {
+                    "aws_s3": {
+                        "maxRetries": 5,
+                        "timeoutS": 900,
+                        "backoff": {
+                            "min": 60000,
+                            "max": 900000,
+                            "jitter": 0.1,
+                            "factor": 1.5
+                        }
+                    },
+                    "azure": {
+                        "maxRetries": 5,
+                        "timeoutS": 900,
+                        "backoff": {
+                            "min": 60000,
+                            "max": 900000,
+                            "jitter": 0.1,
+                            "factor": 1.5
+                        }
+                    },
+                    "gcp": {
+                        "maxRetries": 5,
+                        "timeoutS": 900,
+                        "backoff": {
+                            "min": 60000,
+                            "max": 900000,
+                            "jitter": 0.1,
+                            "factor": 1.5
+                        }
+                    },
+                    "scality": {
+                        "maxRetries": 5,
+                        "timeoutS": 300,
+                        "backoff": {
+                            "min": 1000,
+                            "max": 300000,
+                            "jitter": 0.1,
+                            "factor": 1.5
+                        }
+                    }
+                },
                 "concurrency": 10,
                 "mpuPartsConcurrency": 10,
-                "probeServer": [
-                    {
-                        "site": "aws-location",
-                        "bindAddress": "localhost",
-                        "port": "4043"
-                    }, {
-                        "site" : "us-east-1",
-                        "bindAddress": "localhost",
-                        "port": "4044"
-                    }
-                ]
+                "probeServer": {
+                    "bindAddress": "localhost",
+                    "port": 4043
+                }
             },
             "replicationStatusProcessor": {
                 "groupId": "backbeat-replication-group",
-                "retryTimeoutS": 300,
                 "concurrency": 10,
-                "logConsumerMetricsIntervalS": 60,
                 "probeServer": {
                     "bindAddress": "localhost",
                     "port": 4045
@@ -142,7 +182,11 @@
             "conductor": {
                 "backlogControl": { "enabled": true },
                 "cronRule": "*/5 * * * * *",
-                "concurrency": 10
+                "concurrency": 10,
+                "probeServer": {
+                    "bindAddress": "0.0.0.0",
+                    "port": 8552
+                }
             },
             "bucketProcessor": {
                 "groupId": "backbeat-lifecycle-bucket-processor-group",
@@ -156,7 +200,11 @@
                         "factor": 1.5
                     }
                 },
-                "concurrency": 10
+                "concurrency": 10,
+                "probeServer": {
+                    "bindAddress": "0.0.0.0",
+                    "port": 8553
+                }
             },
             "objectProcessor": {
                 "groupId": "backbeat-lifecycle-object-processor-group",
@@ -170,7 +218,11 @@
                         "factor": 1.5
                     }
                 },
-                "concurrency": 10
+                "concurrency": 10,
+                "probeServer": {
+                    "bindAddress": "0.0.0.0",
+                    "port": 8554
+                }
             }
         }
     },
