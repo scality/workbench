@@ -1,27 +1,40 @@
 {
     "zookeeper": {
         "connectionString": "127.0.0.1:2181/backbeat",
-        "autoCreateNamespace": true
+        "autoCreateNamespace": false
     },
     "kafka": {
         "hosts": "127.0.0.1:9092",
+        "compressionType": "none",
+        "requiredAcks": 1,
         "backlogMetrics": {
             "zkPath": "/run/kafka-backlog-metrics",
             "intervalS": 60
-        }
+        },
+        "maxRequestSize": 5000020
     },
     "s3": {
         "host": "127.0.0.1",
         "port": 8000
     },
+    "vaultAdmin": {
+        "host": "127.0.0.1",
+        "port": 8500
+    },
+    "replicationGroupId": "RG001  ",
     "queuePopulator": {
         "cronRule": "*/5 * * * * *",
         "batchMaxRead": 10000,
+        "batchTimeoutMs": 9000,
         "zookeeperPath": "/queue-populator",
         "logSource": "bucketd",
         "bucketd": {
             "host": "127.0.0.1",
             "port": 9000
+        },
+        "dmd": {
+            "host": "127.0.0.1",
+            "port": 9990
         },
         "mongo": {
             "replicaSetHosts":
@@ -30,6 +43,10 @@
             "replicaSet": "rs0",
             "readPreference": "primary",
             "database": "metadata"
+        },
+        "kafka": {
+            "topic": "backbeat-oplog",
+            "consumerGroupId": "backbeat-qp-oplog-group"
         },
         "probeServer": {
             "bindAddress": "localhost",
@@ -84,36 +101,6 @@
             "queueProcessor": {
                 "groupId": "backbeat-replication-group",
                 "retry": {
-                    "aws_s3": {
-                        "maxRetries": 5,
-                        "timeoutS": 900,
-                        "backoff": {
-                            "min": 60000,
-                            "max": 900000,
-                            "jitter": 0.1,
-                            "factor": 1.5
-                        }
-                    },
-                    "azure": {
-                        "maxRetries": 5,
-                        "timeoutS": 900,
-                        "backoff": {
-                            "min": 60000,
-                            "max": 900000,
-                            "jitter": 0.1,
-                            "factor": 1.5
-                        }
-                    },
-                    "gcp": {
-                        "maxRetries": 5,
-                        "timeoutS": 900,
-                        "backoff": {
-                            "min": 60000,
-                            "max": 900000,
-                            "jitter": 0.1,
-                            "factor": 1.5
-                        }
-                    },
                     "scality": {
                         "maxRetries": 5,
                         "timeoutS": 300,
@@ -134,6 +121,16 @@
             },
             "replicationStatusProcessor": {
                 "groupId": "backbeat-replication-group",
+                "retry": {
+                    "maxRetries": 5,
+                    "timeoutS": 300,
+                    "backoff": {
+                        "min": 1000,
+                        "max": 300000,
+                        "jitter": 0.1,
+                        "factor": 1.5
+                    }
+                },
                 "concurrency": 10,
                 "probeServer": {
                     "bindAddress": "localhost",
