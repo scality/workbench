@@ -150,35 +150,15 @@ services:
     environment:
       SUPERVISORD_CONF: supervisord.conf
       BACKBEAT_CONFIG_FILE: /conf/config.json
-    depends_on:
-      setup-backbeat:
-        condition: service_completed_successfully
     volumes:
       - ./config/backbeat/supervisord.conf:/conf/supervisord.conf:ro
       - ./config/backbeat/config.json:/conf/config.json:ro
       - ./config/backbeat/config.notification.json:/conf/config.notification.json:ro
       - ./config/backbeat/env:/conf/env:ro
       - ./logs/backbeat:/logs
-      - ./config/vault/:/secrets/:rw
     profiles:
       - feature-crr
       - feature-notifications
-
-  setup-backbeat:
-    build:
-      context: ./config/backbeat
-      dockerfile: Dockerfile.setup
-      args:
-        BASE_IMAGE: ${BACKBEAT_IMAGE}
-    container_name: workbench-setup-backbeat
-    network_mode: host
-    depends_on:
-      setup-vault:
-        condition: service_completed_successfully
-    volumes:
-      - ./config/vault/:/secrets
-    profiles:
-      - feature-crr
 
   redis:
     image: ${REDIS_IMAGE}
