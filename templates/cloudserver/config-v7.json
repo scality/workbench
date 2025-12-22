@@ -1,6 +1,7 @@
 {
     "port": 8000,
     "listenOn": [],
+    "metricsPort": 8002,
     "replicationGroupId": "RG001",
     "restEndpoints": {
         "localhost": "us-east-1",
@@ -28,7 +29,7 @@
     ],
     "replicationEndpoints": [
         {
-            "site": "zenko",
+            "site": "sf",
             "servers": ["127.0.0.1:8000"],
             "default": true
         },

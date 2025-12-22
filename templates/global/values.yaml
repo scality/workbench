@@ -13,6 +13,9 @@ features:
       username: admin
       password: admin123
 
+  cross_region_replication:
+    enabled: false
+
   utapi:
     enabled: false
 

@@ -1,27 +1,44 @@
 {
     "zookeeper": {
         "connectionString": "127.0.0.1:2181/backbeat",
-        "autoCreateNamespace": true
+        "autoCreateNamespace": false
     },
     "kafka": {
         "hosts": "127.0.0.1:9092",
+        "compressionType": "none",
+        "requiredAcks": 1,
         "backlogMetrics": {
             "zkPath": "/run/kafka-backlog-metrics",
             "intervalS": 60
-        }
+        },
+        "maxRequestSize": 5000020
     },
     "s3": {
         "host": "127.0.0.1",
         "port": 8000
     },
+    "vaultAdmin": {
+        "host": "127.0.0.1",
+        "port": 8500
+    },
+    "replicationGroupId": "RG001  ",
     "queuePopulator": {
         "cronRule": "*/5 * * * * *",
         "batchMaxRead": 10000,
+        "batchTimeoutMs": 9000,
         "zookeeperPath": "/queue-populator",
         "logSource": "bucketd",
         "bucketd": {
             "host": "127.0.0.1",
             "port": 9000
+        },
+        "dmd": {
+            "host": "127.0.0.1",
+            "port": 9990
+        },
+        "kafka": {
+            "topic": "backbeat-oplog",
+            "consumerGroupId": "backbeat-qp-oplog-group"
         },
         "probeServer": {
             "bindAddress": "localhost",
@@ -37,27 +54,32 @@
                     "port": 8000
                 },
                 "auth": {
-                    "type": "account",
-                    "account": "bart",
+                    "type": "role",
                     "vault": {
                         "host": "127.0.0.1",
                         "port": 8500,
-                        "adminPort": 8600
+                        "adminPort": 8600,
+                        "adminCredentialsFile": "/home/scality/backbeat/node_modules/vaultclient/tests/utils/admincredentials.json"
                     }
                 }
             },
             "destination": {
                 "transport": "http",
                 "bootstrapList": [
-                    { "site": "sf", "servers": ["127.0.0.1:9443"], "echo": false },
-                    { "site": "aws-location", "type": "aws_s3" }
+                    { "site": "sf", "servers": ["127.0.0.1:8000"], "echo": false }
                 ],
                 "auth": {
-                    "type": "account",
-                    "account": "lisa"
+                    "type": "role",
+                    "vault": {
+                        "host": "127.0.0.1",
+                        "port": 8500,
+                        "adminPort": 8600,
+                        "adminCredentialsFile": "/home/scality/backbeat/node_modules/vaultclient/tests/utils/admincredentials.json"
+                    }
                 }
             },
             "topic": "backbeat-replication",
+            "dataMoverTopic": "backbeat-data-mover",
             "replicationStatusTopic": "backbeat-replication-status",
             "replicationFailedTopic": "backbeat-replication-failed",
             "monitorReplicationFailures": true,
@@ -70,26 +92,38 @@
             ],
             "queueProcessor": {
                 "groupId": "backbeat-replication-group",
-                "retryTimeoutS": 300,
+                "retry": {
+                    "scality": {
+                        "maxRetries": 5,
+                        "timeoutS": 300,
+                        "backoff": {
+                            "min": 1000,
+                            "max": 300000,
+                            "jitter": 0.1,
+                            "factor": 1.5
+                        }
+                    }
+                },
                 "concurrency": 10,
                 "mpuPartsConcurrency": 10,
-                "probeServer": [
-                    {
-                        "site": "aws-location",
-                        "bindAddress": "localhost",
-                        "port": "4043"
-                    }, {
-                        "site" : "us-east-1",
-                        "bindAddress": "localhost",
-                        "port": "4044"
-                    }
-                ]
+                "probeServer": {
+                    "bindAddress": "localhost",
+                    "port": 4043
+                }
             },
             "replicationStatusProcessor": {
                 "groupId": "backbeat-replication-group",
-                "retryTimeoutS": 300,
+                "retry": {
+                    "maxRetries": 5,
+                    "timeoutS": 300,
+                    "backoff": {
+                        "min": 1000,
+                        "max": 300000,
+                        "jitter": 0.1,
+                        "factor": 1.5
+                    }
+                },
                 "concurrency": 10,
-                "logConsumerMetricsIntervalS": 60,
                 "probeServer": {
                     "bindAddress": "localhost",
                     "port": 4045
@@ -137,7 +171,11 @@
             "conductor": {
                 "backlogControl": { "enabled": true },
                 "cronRule": "*/5 * * * * *",
-                "concurrency": 10
+                "concurrency": 10,
+                "probeServer": {
+                    "bindAddress": "0.0.0.0",
+                    "port": 8552
+                }
             },
             "bucketProcessor": {
                 "groupId": "backbeat-lifecycle-bucket-processor-group",
@@ -151,7 +189,11 @@
                         "factor": 1.5
                     }
                 },
-                "concurrency": 10
+                "concurrency": 10,
+                "probeServer": {
+                    "bindAddress": "0.0.0.0",
+                    "port": 8553
+                }
             },
             "objectProcessor": {
                 "groupId": "backbeat-lifecycle-object-processor-group",
@@ -165,7 +207,11 @@
                         "factor": 1.5
                     }
                 },
-                "concurrency": 10
+                "concurrency": 10,
+                "probeServer": {
+                    "bindAddress": "0.0.0.0",
+                    "port": 8554
+                }
             }
         }
     },
