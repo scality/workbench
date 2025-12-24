@@ -20,7 +20,7 @@ features:
     enabled: false
 
 cloudserver:
-  image: ghcr.io/scality/cloudserver:9.2.10
+  image: ghcr.io/scality/cloudserver:9.2.12
 
 vault:
   image: ghcr.io/scality/vault:7.83.0
@@ -32,7 +32,7 @@ s3_metadata:
   image: ghcr.io/scality/metadata:8.23.0-standalone
 
 scuba:
-  image: ghcr.io/scality/scuba:1.1.17-nodesvc-base
+  image: ghcr.io/scality/scuba:1.1.18-nodesvc-base
 
 scuba_metadata:
   image: ghcr.io/scality/metadata:8.23.0-standalone
