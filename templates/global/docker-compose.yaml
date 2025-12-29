@@ -214,8 +214,16 @@ services:
     network_mode: host
     environment:
       KAFKA_PORT: '9092'
-      TOPICS_TO_CREATE: backbeat-lifecycle-bucket-tasks backbeat-lifecycle-object-tasks backbeat-bucket-notification
-      CREATE_NOTIFICATION_PATHS: 'true'
+      TOPICS_TO_CREATE: >
+        backbeat-lifecycle-bucket-tasks
+        backbeat-lifecycle-object-tasks
+        backbeat-bucket-notification
+        backbeat-replication
+        backbeat-data-mover
+        backbeat-replication-status
+        backbeat-replication-failed
+        backbeat-metrics-group-crr
+      CREATE_ZOOKEEPER_PATHS: 'true'
       ZOOKEEPER_ENDPOINT: 127.0.0.1:2181/backbeat
     depends_on:
       setup-vault:

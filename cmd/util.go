@@ -84,6 +84,10 @@ func getComposeProfiles(cfg EnvironmentConfig) []string {
 		profiles = append(profiles, "feature-migration")
 	}
 
+	if cfg.Features.CrossRegionReplication.Enabled {
+		profiles = append(profiles, "feature-crr")
+	}
+
 	return profiles
 }
 
