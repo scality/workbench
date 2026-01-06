@@ -22,6 +22,9 @@ features:
   migration:
     enabled: false
 
+  access_logging:
+    enabled: false
+
 cloudserver:
   image: ghcr.io/scality/cloudserver:9.2.13
 
@@ -54,3 +57,6 @@ utapi:
 
 migration_tools:
   image: ghcr.io/scality/metadata-migration:1.4.0-svc-base
+
+clickhouse:
+  image: clickhouse/clickhouse-server:24.3.2.23-alpine
