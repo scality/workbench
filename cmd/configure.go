@@ -37,6 +37,7 @@ func (c *ConfigureCmd) Run() error {
 func createLogDirectories(envDir string) error {
 	logDirs := []string{
 		filepath.Join(envDir, "logs"),
+		filepath.Join(envDir, "logs", "cloudserver"),
 		filepath.Join(envDir, "logs", "scuba"),
 		filepath.Join(envDir, "logs", "backbeat"),
 		filepath.Join(envDir, "logs", "migration-tools"),
