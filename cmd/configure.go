@@ -40,6 +40,8 @@ func createLogDirectories(envDir string) error {
 		filepath.Join(envDir, "logs", "scuba"),
 		filepath.Join(envDir, "logs", "backbeat"),
 		filepath.Join(envDir, "logs", "migration-tools"),
+		filepath.Join(envDir, "logs", "clickhouse-shard-1"),
+		filepath.Join(envDir, "logs", "clickhouse-shard-2"),
 	}
 
 	for _, dir := range logDirs {
@@ -71,6 +73,7 @@ func configureEnv(cfg EnvironmentConfig, envDir string) error {
 		generateKafkaConfig,
 		generateUtapiConfig,
 		generateMigrationToolsConfig,
+		generateClickhouseConfig,
 	}
 
 	configDir := filepath.Join(envDir, "config")
@@ -198,4 +201,22 @@ func generateMigrationToolsConfig(cfg EnvironmentConfig, path string) error {
 	}
 
 	return renderTemplates(cfg, "templates/migration-tools", filepath.Join(path, "migration-tools"), templates)
+}
+
+func generateClickhouseConfig(cfg EnvironmentConfig, path string) error {
+	templates := []string{
+		"Dockerfile.setup",
+		"cluster-config.xml",
+		"ports-shard-1.xml",
+		"ports-shard-2.xml",
+		"init-schema.sh",
+		"init.d/01-create-database.sql",
+		"init.d/02-create-ingest-table.sql",
+		"init.d/03-create-storage-table.sql",
+		"init.d/04-create-offsets-table.sql",
+		"init.d/05-create-distributed-tables.sql",
+		"init.d/06-create-materialized-view.sql",
+	}
+
+	return renderTemplates(cfg, "templates/clickhouse", filepath.Join(path, "clickhouse"), templates)
 }
