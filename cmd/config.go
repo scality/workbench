@@ -57,6 +57,7 @@ type EnvironmentConfig struct {
 	Redis          RedisConfig          `yaml:"redis"`
 	Utapi          UtapiConfig          `yaml:"utapi"`
 	MigrationTools MigrationToolsConfig `yaml:"migration_tools"`
+	Clickhouse     ClickhouseConfig     `yaml:"clickhouse"`
 }
 
 type GlobalConfig struct {
@@ -70,6 +71,7 @@ type FeatureConfig struct {
 	CrossRegionReplication CrossRegionReplicationFeatureConfig `yaml:"cross_region_replication"`
 	Utapi                  UtapiFeatureConfig               `yaml:"utapi"`
 	Migration              MigrationFeatureConfig           `yaml:"migration"`
+	AccessLogging          AccessLoggingFeatureConfig       `yaml:"access_logging"`
 }
 
 type ScubaFeatureConfig struct {
@@ -212,6 +214,15 @@ type RedisConfig struct {
 	LogLevel string `yaml:"log_level"`
 }
 
+type ClickhouseConfig struct {
+	Image    string `yaml:"image"`
+	LogLevel string `yaml:"log_level"`
+}
+
+type AccessLoggingFeatureConfig struct {
+	Enabled bool `yaml:"enabled"`
+}
+
 func DefaultEnvironmentConfig() EnvironmentConfig {
 	return EnvironmentConfig{
 		Global: GlobalConfig{
@@ -235,6 +246,9 @@ func DefaultEnvironmentConfig() EnvironmentConfig {
 				Enabled: false,
 			},
 			CrossRegionReplication: CrossRegionReplicationFeatureConfig{
+				Enabled: false,
+			},
+			AccessLogging: AccessLoggingFeatureConfig{
 				Enabled: false,
 			},
 		},
@@ -272,6 +286,7 @@ func DefaultEnvironmentConfig() EnvironmentConfig {
 		},
 		Utapi:          UtapiConfig{},
 		MigrationTools: MigrationToolsConfig{},
+		Clickhouse: ClickhouseConfig{},
 	}
 }
 
@@ -346,6 +361,10 @@ func LoadEnvironmentConfig(path string) (EnvironmentConfig, error) {
 
 	if cfg.MigrationTools.LogLevel == "" {
 		cfg.MigrationTools.LogLevel = cfg.Global.LogLevel
+	}
+
+	if cfg.Clickhouse.LogLevel == "" {
+		cfg.Clickhouse.LogLevel = cfg.Global.LogLevel
 	}
 
 	return cfg, nil
