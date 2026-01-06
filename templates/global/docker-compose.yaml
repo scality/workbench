@@ -66,6 +66,7 @@ services:
     volumes:
       - ./config/cloudserver/config.json:/conf/config.json:ro
       - ./config/cloudserver/locationConfig.json:/conf/locationConfig.json:ro
+      - ./logs/cloudserver:/logs:rw
     profiles:
       - base
 
