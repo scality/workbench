@@ -58,6 +58,7 @@ type EnvironmentConfig struct {
 	Utapi          UtapiConfig          `yaml:"utapi"`
 	MigrationTools MigrationToolsConfig `yaml:"migration_tools"`
 	Clickhouse     ClickhouseConfig     `yaml:"clickhouse"`
+	Fluentbit      FluentbitConfig      `yaml:"fluentbit"`
 }
 
 type GlobalConfig struct {
@@ -219,6 +220,11 @@ type ClickhouseConfig struct {
 	LogLevel string `yaml:"log_level"`
 }
 
+type FluentbitConfig struct {
+	Image    string `yaml:"image"`
+	LogLevel string `yaml:"log_level"`
+}
+
 type AccessLoggingFeatureConfig struct {
 	Enabled bool `yaml:"enabled"`
 }
@@ -286,7 +292,8 @@ func DefaultEnvironmentConfig() EnvironmentConfig {
 		},
 		Utapi:          UtapiConfig{},
 		MigrationTools: MigrationToolsConfig{},
-		Clickhouse: ClickhouseConfig{},
+		Clickhouse:     ClickhouseConfig{},
+		Fluentbit:      FluentbitConfig{},
 	}
 }
 
@@ -365,6 +372,10 @@ func LoadEnvironmentConfig(path string) (EnvironmentConfig, error) {
 
 	if cfg.Clickhouse.LogLevel == "" {
 		cfg.Clickhouse.LogLevel = cfg.Global.LogLevel
+	}
+
+	if cfg.Fluentbit.LogLevel == "" {
+		cfg.Fluentbit.LogLevel = cfg.Global.LogLevel
 	}
 
 	return cfg, nil
