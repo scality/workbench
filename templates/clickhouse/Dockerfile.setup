@@ -1,0 +1,9 @@
+ARG BASE_IMAGE
+FROM $BASE_IMAGE
+
+USER root
+
+COPY --chmod=755 init-schema.sh /opt/
+COPY init.d/*.sql /opt/init.d/
+
+CMD ["/opt/init-schema.sh"]

@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<clickhouse>
+    <remote_servers>
+        <workbench_cluster>
+            <shard>
+                <replica>
+                    <host>127.0.0.1</host>
+                    <port>9002</port>
+                    <user>default</user>
+                    <password></password>
+                </replica>
+            </shard>
+            <shard>
+                <replica>
+                    <host>127.0.0.1</host>
+                    <port>9003</port>
+                    <user>default</user>
+                    <password></password>
+                </replica>
+            </shard>
+        </workbench_cluster>
+    </remote_servers>
+</clickhouse>
