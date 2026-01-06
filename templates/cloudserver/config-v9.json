@@ -177,5 +177,22 @@
     "integrityChecks": {
         "objectPutRetention": true
     },
+    {{ if .Features.AccessLogging.Enabled }}
+    "serverAccessLogs": {
+        "mode": "ENABLED",
+        "outputFile": "/logs/server-access.log",
+        "highWaterMarkBytes": 10485760,
+        "retryReopenDelayMS": 1000,
+        "checkFileRotationIntervalMS": 10000
+    },
+    {{ else }}
+    "serverAccessLogs": {
+        "mode": "DISABLED",
+        "outputFile": "/logs/server-access.log",
+        "highWaterMarkBytes": 10485760,
+        "retryReopenDelayMS": 1000,
+        "checkFileRotationIntervalMS": 10000
+    },
+    {{ end }}
     "testingMode": true
 }
