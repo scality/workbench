@@ -390,5 +390,10 @@ func LoadEnvironmentConfig(path string) (EnvironmentConfig, error) {
 		cfg.LogCourier.LogLevel = cfg.Global.LogLevel
 	}
 
+	// Apply environment variable overrides
+	if v := os.Getenv("WORKBENCH_LOG_COURIER_IMAGE"); v != "" {
+		cfg.LogCourier.Image = v
+	}
+
 	return cfg, nil
 }
