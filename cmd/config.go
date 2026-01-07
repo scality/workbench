@@ -232,7 +232,8 @@ type LogCourierConfig struct {
 }
 
 type AccessLoggingFeatureConfig struct {
-	Enabled bool `yaml:"enabled"`
+	Enabled         bool `yaml:"enabled"`
+	ClickhouseOnly  bool `yaml:"clickhouse_only"`
 }
 
 func DefaultEnvironmentConfig() EnvironmentConfig {

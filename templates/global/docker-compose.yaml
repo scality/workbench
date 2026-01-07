@@ -88,7 +88,7 @@ services:
       - ./logs/fluentbit:/var/log/fluent-bit:rw
       - ./data/fluentbit:/fluent-bit/data:rw
     profiles:
-      - feature-access-logging
+      - feature-access-logging-full
 
   vault:
     image: ${VAULT_IMAGE}
@@ -373,3 +373,19 @@ services:
         condition: service_healthy
     profiles:
       - feature-access-logging
+
+  log-courier:
+    image: ${LOG_COURIER_IMAGE}
+    container_name: workbench-log-courier
+    network_mode: host
+    depends_on:
+      clickhouse-shard-1:
+        condition: service_healthy
+      clickhouse-shard-2:
+        condition: service_healthy
+    environment:
+      SUPERVISORD_CONF: "supervisord.conf"
+    volumes:
+      - ./config/log-courier:/conf:ro
+    profiles:
+      - feature-access-logging-full

@@ -24,6 +24,10 @@ features:
 
   access_logging:
     enabled: false
+    # clickhouse_only: Deploy only Clickhouse without Fluentbit, log-courier, and cloudserver access logs
+    # When true, only Clickhouse will be deployed (useful for testing Clickhouse setup)
+    # When false (default), full access logging pipeline is deployed
+    clickhouse_only: false
 
 cloudserver:
   image: ghcr.io/scality/cloudserver:9.2.13

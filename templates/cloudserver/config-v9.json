@@ -177,7 +177,7 @@
     "integrityChecks": {
         "objectPutRetention": true
     },
-    {{ if .Features.AccessLogging.Enabled }}
+    {{ if and .Features.AccessLogging.Enabled (not .Features.AccessLogging.ClickhouseOnly) }}
     "serverAccessLogs": {
         "mode": "ENABLED",
         "outputFile": "/logs/server-access.log",

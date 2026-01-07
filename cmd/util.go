@@ -90,6 +90,9 @@ func getComposeProfiles(cfg EnvironmentConfig) []string {
 
 	if cfg.Features.AccessLogging.Enabled {
 		profiles = append(profiles, "feature-access-logging")
+		if !cfg.Features.AccessLogging.ClickhouseOnly {
+			profiles = append(profiles, "feature-access-logging-full")
+		}
 	}
 
 	return profiles
