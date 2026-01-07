@@ -1,0 +1,50 @@
+# ClickHouse connection (direct to native TCP port)
+clickhouse:
+  url: "127.0.0.1:9002,127.0.0.1:9003"
+  username: "default"
+  password: ""
+  timeout-seconds: 30
+
+# S3 connection (credentials from environment variables)
+s3:
+  endpoint: "http://127.0.0.1:8000"
+  max-retry-attempts: 3
+  max-backoff-delay-seconds: 20
+
+# Consumer behavior (aggressive thresholds for testing)
+consumer:
+  count-threshold: 10
+  time-threshold-seconds: 10
+  min-discovery-interval-seconds: 10
+  max-discovery-interval-seconds: 10
+  discovery-interval-jitter-factor: 0.1
+  num-workers: 10
+  max-buckets-per-discovery: 100
+  max-logs-per-bucket: 100000
+
+# Retry logic
+retry:
+  max-retries: 5
+  initial-backoff-seconds: 1
+  max-backoff-seconds: 60
+  backoff-jitter-factor: 0.3
+
+# Operation timeouts
+timeout:
+  upload-operation-seconds: 300
+  commit-operation-seconds: 30
+
+# Offset flushing
+offset:
+  flush-time-threshold-ms: 1000
+  flush-count-threshold: 50
+
+# Metrics server
+metrics-server:
+  enabled: true
+  listen-address: "127.0.0.1"
+  listen-port: 9090
+
+# General settings
+log-level: "{{ .LogCourier.LogLevel }}"
+shutdown-timeout-seconds: 30

@@ -77,6 +77,7 @@ func configureEnv(cfg EnvironmentConfig, envDir string) error {
 		generateMigrationToolsConfig,
 		generateClickhouseConfig,
 		generateFluentbitConfig,
+		generateLogCourierConfig,
 	}
 
 	configDir := filepath.Join(envDir, "config")
@@ -231,4 +232,14 @@ func generateFluentbitConfig(cfg EnvironmentConfig, path string) error {
 	}
 
 	return renderTemplates(cfg, "templates/fluentbit", filepath.Join(path, "fluentbit"), templates)
+}
+
+func generateLogCourierConfig(cfg EnvironmentConfig, path string) error {
+	templates := []string{
+		"env",
+		"supervisord.conf",
+		"log-courier.yml",
+	}
+
+	return renderTemplates(cfg, "templates/log-courier", filepath.Join(path, "log-courier"), templates)
 }
