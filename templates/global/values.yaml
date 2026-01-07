@@ -63,3 +63,6 @@ clickhouse:
 
 fluentbit:
   image: fluent/fluent-bit:3.2.2
+
+log_courier:
+  image: ghcr.io/scality/log-courier:0.1.0-pw23-debug

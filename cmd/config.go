@@ -59,6 +59,7 @@ type EnvironmentConfig struct {
 	MigrationTools MigrationToolsConfig `yaml:"migration_tools"`
 	Clickhouse     ClickhouseConfig     `yaml:"clickhouse"`
 	Fluentbit      FluentbitConfig      `yaml:"fluentbit"`
+	LogCourier     LogCourierConfig     `yaml:"log_courier"`
 }
 
 type GlobalConfig struct {
@@ -225,6 +226,11 @@ type FluentbitConfig struct {
 	LogLevel string `yaml:"log_level"`
 }
 
+type LogCourierConfig struct {
+	Image    string `yaml:"image"`
+	LogLevel string `yaml:"log_level"`
+}
+
 type AccessLoggingFeatureConfig struct {
 	Enabled bool `yaml:"enabled"`
 }
@@ -294,6 +300,7 @@ func DefaultEnvironmentConfig() EnvironmentConfig {
 		MigrationTools: MigrationToolsConfig{},
 		Clickhouse:     ClickhouseConfig{},
 		Fluentbit:      FluentbitConfig{},
+		LogCourier:     LogCourierConfig{},
 	}
 }
 
@@ -376,6 +383,10 @@ func LoadEnvironmentConfig(path string) (EnvironmentConfig, error) {
 
 	if cfg.Fluentbit.LogLevel == "" {
 		cfg.Fluentbit.LogLevel = cfg.Global.LogLevel
+	}
+
+	if cfg.LogCourier.LogLevel == "" {
+		cfg.LogCourier.LogLevel = cfg.Global.LogLevel
 	}
 
 	return cfg, nil
