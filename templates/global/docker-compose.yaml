@@ -294,7 +294,11 @@ services:
       - feature-migration
 
   clickhouse-shard-1:
-    image: ${CLICKHOUSE_IMAGE}
+    build:
+      context: ./config/clickhouse
+      dockerfile: Dockerfile.shard
+      args:
+        BASE_IMAGE: ${CLICKHOUSE_IMAGE}
     container_name: workbench-clickhouse-shard-1
     hostname: clickhouse-shard-1
     network_mode: host
@@ -316,7 +320,11 @@ services:
       - feature-access-logging
 
   clickhouse-shard-2:
-    image: ${CLICKHOUSE_IMAGE}
+    build:
+      context: ./config/clickhouse
+      dockerfile: Dockerfile.shard
+      args:
+        BASE_IMAGE: ${CLICKHOUSE_IMAGE}
     container_name: workbench-clickhouse-shard-2
     hostname: clickhouse-shard-2
     network_mode: host
