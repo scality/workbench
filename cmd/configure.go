@@ -205,7 +205,9 @@ func generateMigrationToolsConfig(cfg EnvironmentConfig, path string) error {
 
 func generateClickhouseConfig(cfg EnvironmentConfig, path string) error {
 	templates := []string{
+		"Dockerfile.shard",
 		"Dockerfile.setup",
+		"entrypoint.sh",
 		"cluster-config.xml",
 		"ports-shard-1.xml",
 		"ports-shard-2.xml",
