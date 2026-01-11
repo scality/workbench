@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS logs.access_logs_ingest
     -- Analytics
     action                 LowCardinality(String),
     accountName            String,
-    accountDisplayName     String,
     userName               String,
     clientPort             UInt32,
     httpMethod             LowCardinality(String),
