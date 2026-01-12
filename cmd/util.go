@@ -88,6 +88,10 @@ func getComposeProfiles(cfg EnvironmentConfig) []string {
 		profiles = append(profiles, "feature-crr")
 	}
 
+	if cfg.Features.AccessLogging.Enabled {
+		profiles = append(profiles, "feature-access-logging")
+	}
+
 	return profiles
 }
 

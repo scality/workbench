@@ -292,3 +292,71 @@ services:
       - ./logs/migration-tools:/logs:rw
     profiles:
       - feature-migration
+
+  clickhouse-shard-1:
+    build:
+      context: ./config/clickhouse
+      dockerfile: Dockerfile.shard
+      args:
+        BASE_IMAGE: ${CLICKHOUSE_IMAGE}
+    container_name: workbench-clickhouse-shard-1
+    hostname: clickhouse-shard-1
+    network_mode: host
+    environment:
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: ""
+    volumes:
+      - ./data/clickhouse-shard-1:/var/lib/clickhouse
+      - ./logs/clickhouse-shard-1:/var/log/clickhouse-server:rw
+      - ./config/clickhouse/cluster-config.xml:/etc/clickhouse-server/config.d/cluster.xml:ro
+      - ./config/clickhouse/ports-shard-1.xml:/etc/clickhouse-server/config.d/ports.xml:ro
+    healthcheck:
+      test: ["CMD", "clickhouse-client", "--port", "9002", "--query", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    profiles:
+      - feature-access-logging
+
+  clickhouse-shard-2:
+    build:
+      context: ./config/clickhouse
+      dockerfile: Dockerfile.shard
+      args:
+        BASE_IMAGE: ${CLICKHOUSE_IMAGE}
+    container_name: workbench-clickhouse-shard-2
+    hostname: clickhouse-shard-2
+    network_mode: host
+    environment:
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: ""
+    volumes:
+      - ./data/clickhouse-shard-2:/var/lib/clickhouse
+      - ./logs/clickhouse-shard-2:/var/log/clickhouse-server:rw
+      - ./config/clickhouse/cluster-config.xml:/etc/clickhouse-server/config.d/cluster.xml:ro
+      - ./config/clickhouse/ports-shard-2.xml:/etc/clickhouse-server/config.d/ports.xml:ro
+    healthcheck:
+      test: ["CMD", "clickhouse-client", "--port", "9003", "--query", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    profiles:
+      - feature-access-logging
+
+  setup-clickhouse:
+    build:
+      context: ./config/clickhouse
+      dockerfile: Dockerfile.setup
+      args:
+        BASE_IMAGE: ${CLICKHOUSE_IMAGE}
+    container_name: workbench-setup-clickhouse
+    network_mode: host
+    depends_on:
+      clickhouse-shard-1:
+        condition: service_healthy
+      clickhouse-shard-2:
+        condition: service_healthy
+    profiles:
+      - feature-access-logging
