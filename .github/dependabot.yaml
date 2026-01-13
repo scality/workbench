@@ -26,6 +26,8 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "redis"
         update-types: ["version-update:semver-major"]
+      - dependency-name: "clickhouse/clickhouse-server"
+      - dependency-name: "fluent/fluent-bit"
     groups:
       docker:
         patterns:
