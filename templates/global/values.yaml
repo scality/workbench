@@ -59,4 +59,4 @@ migration_tools:
   image: ghcr.io/scality/metadata-migration:1.4.0-svc-base
 
 clickhouse:
-  image: clickhouse/clickhouse-server:24.3.2.23-alpine
+  image: clickhouse/clickhouse-server:25.12.2.54-alpine
