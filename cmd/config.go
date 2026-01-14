@@ -62,8 +62,7 @@ type EnvironmentConfig struct {
 }
 
 type GlobalConfig struct {
-	LogLevel string `yaml:"logLevel"`
-	// Profile  string `yaml:"profile"`
+	LogLevel string `yaml:"log_level"`
 }
 
 type FeatureConfig struct {
@@ -233,7 +232,6 @@ func DefaultEnvironmentConfig() EnvironmentConfig {
 	return EnvironmentConfig{
 		Global: GlobalConfig{
 			LogLevel: "info",
-			// Profile:  "default",
 		},
 		Features: FeatureConfig{
 			BucketNotifications: BucketNotificationsFeatureConfig{
@@ -267,7 +265,6 @@ func DefaultEnvironmentConfig() EnvironmentConfig {
 				RepdAdmin: 4250,
 			},
 			RaftSessions: 3,
-			// LogLevel:     "info",
 			Migration: &MigrationConfig{
 				Deploy: false,
 				BasePorts: MdPortConfig{
@@ -288,7 +285,6 @@ func DefaultEnvironmentConfig() EnvironmentConfig {
 				RepdAdmin: 14250,
 			},
 			RaftSessions: 1,
-			// LogLevel:     "info",
 		},
 		Utapi:          UtapiConfig{},
 		MigrationTools: MigrationToolsConfig{},
