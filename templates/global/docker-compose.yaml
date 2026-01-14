@@ -66,8 +66,27 @@ services:
     volumes:
       - ./config/cloudserver/config.json:/conf/config.json:ro
       - ./config/cloudserver/locationConfig.json:/conf/locationConfig.json:ro
+      - ./logs/cloudserver:/logs:rw
     profiles:
       - base
+
+  fluentbit:
+    image: ${FLUENTBIT_IMAGE}
+    container_name: workbench-fluentbit
+    network_mode: host
+    depends_on:
+      clickhouse-shard-1:
+        condition: service_healthy
+      clickhouse-shard-2:
+        condition: service_healthy
+    volumes:
+      - ./config/fluentbit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+      - ./config/fluentbit/parsers.conf:/fluent-bit/etc/parsers.conf:ro
+      - ./logs/cloudserver:/fluent-bit/log:ro
+      - ./logs/fluentbit:/var/log/fluent-bit:rw
+      - ./data/fluentbit:/fluent-bit/data:rw
+    profiles:
+      - feature-access-logging
 
   vault:
     image: ${VAULT_IMAGE}

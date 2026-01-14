@@ -37,11 +37,13 @@ func (c *ConfigureCmd) Run() error {
 func createLogDirectories(envDir string) error {
 	logDirs := []string{
 		filepath.Join(envDir, "logs"),
+		filepath.Join(envDir, "logs", "cloudserver"),
 		filepath.Join(envDir, "logs", "scuba"),
 		filepath.Join(envDir, "logs", "backbeat"),
 		filepath.Join(envDir, "logs", "migration-tools"),
 		filepath.Join(envDir, "logs", "clickhouse-shard-1"),
 		filepath.Join(envDir, "logs", "clickhouse-shard-2"),
+		filepath.Join(envDir, "logs", "fluentbit"),
 	}
 
 	for _, dir := range logDirs {
@@ -74,6 +76,7 @@ func configureEnv(cfg EnvironmentConfig, envDir string) error {
 		generateUtapiConfig,
 		generateMigrationToolsConfig,
 		generateClickhouseConfig,
+		generateFluentbitConfig,
 	}
 
 	configDir := filepath.Join(envDir, "config")
@@ -221,4 +224,13 @@ func generateClickhouseConfig(cfg EnvironmentConfig, path string) error {
 	}
 
 	return renderTemplates(cfg, "templates/clickhouse", filepath.Join(path, "clickhouse"), templates)
+}
+
+func generateFluentbitConfig(cfg EnvironmentConfig, path string) error {
+	templates := []string{
+		"fluent-bit.conf",
+		"parsers.conf",
+	}
+
+	return renderTemplates(cfg, "templates/fluentbit", filepath.Join(path, "fluentbit"), templates)
 }
