@@ -62,7 +62,7 @@ type EnvironmentConfig struct {
 }
 
 type GlobalConfig struct {
-	LogLevel string `yaml:"logLevel"`
+	LogLevel string `yaml:"log_level"`
 	// Profile  string `yaml:"profile"`
 }
 
