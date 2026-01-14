@@ -50,7 +50,7 @@
     "keyFilePath": "./tests/utils/keyfile",
     "adminCredentialsFilePath": "./tests/utils/admincredentials.json.encrypted",
     "log": {
-        "level": "info",
+        "level": "{{ .Vault.LogLevel }}",
         "dump": "error"
     },
     "accountSeeds": [
