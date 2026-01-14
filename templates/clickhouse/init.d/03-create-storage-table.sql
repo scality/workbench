@@ -1,46 +1,45 @@
 CREATE TABLE IF NOT EXISTS logs.access_logs
 (
     -- Common
-    timestamp              DateTime,
     insertedAt             DateTime DEFAULT now(),
-    hostname               LowCardinality(String),
+    hostname               LowCardinality(Nullable(String)),
 
     -- AWS access server logs fields https://docs.aws.amazon.com/AmazonS3/latest/userguide/LogFormat.html
     startTime              DateTime64(3), -- AWS "Time" field
-    requester              String,
-    operation              String,
-    requestURI             String,
-    errorCode              String,
-    objectSize             UInt64,
-    totalTime              Float32,
-    turnAroundTime         Float32,
-    referer                String,
-    userAgent              String,
-    versionId              String,
-    signatureVersion       LowCardinality(String),
-    cipherSuite            LowCardinality(String),
-    authenticationType     LowCardinality(String),
-    hostHeader             String,
-    tlsVersion             LowCardinality(String),
-    aclRequired            LowCardinality(String),
+    requester              Nullable(String),
+    operation              Nullable(String),
+    requestURI             Nullable(String),
+    errorCode              Nullable(String),
+    objectSize             Nullable(UInt64),
+    totalTime              Nullable(Float32),
+    turnAroundTime         Nullable(Float32),
+    referer                Nullable(String),
+    userAgent              Nullable(String),
+    versionId              Nullable(String),
+    signatureVersion       LowCardinality(Nullable(String)),
+    cipherSuite            LowCardinality(Nullable(String)),
+    authenticationType     LowCardinality(Nullable(String)),
+    hostHeader             Nullable(String),
+    tlsVersion             LowCardinality(Nullable(String)),
+    aclRequired            LowCardinality(Nullable(String)),
 
     -- Shared between AWS access server logs and Analytics logs
-    bucketOwner            String, -- AWS "Bucket Owner" field
-    bucketName             String, -- AWS "Bucket" field
-    req_id                 String, -- AWS "Request ID" field
-    bytesSent              UInt64, -- AWS "Bytes Sent" field
-    clientIP               String, -- AWS "Remote IP" field
-    httpCode               UInt16, -- AWS "HTTP Status" field
-    objectKey              String, -- AWS "Key" field
+    bucketOwner            Nullable(String), -- AWS "Bucket Owner" field
+    bucketName             String DEFAULT '', -- AWS "Bucket" field
+    req_id                 String DEFAULT '', -- AWS "Request ID" field
+    bytesSent              Nullable(UInt64), -- AWS "Bytes Sent" field
+    clientIP               Nullable(String), -- AWS "Remote IP" field
+    httpCode               Nullable(UInt16), -- AWS "HTTP Status" field
+    objectKey              Nullable(String), -- AWS "Key" field
 
     -- Scality server access logs extra fields.
-    logFormatVersion       LowCardinality(String),
-    loggingEnabled         Bool,
-    loggingTargetBucket    String,
-    loggingTargetPrefix    String,
-    awsAccessKeyID         String,
-    raftSessionID          UInt16
+    logFormatVersion       LowCardinality(Nullable(String)),
+    loggingEnabled         Bool DEFAULT false,
+    loggingTargetBucket    String DEFAULT '',
+    loggingTargetPrefix    String DEFAULT '',
+    awsAccessKeyID         Nullable(String),
+    raftSessionID          UInt16 DEFAULT 0
 )
 Engine = MergeTree()
-PARTITION BY toStartOfInterval(insertedAt, INTERVAL 24 HOUR)
-ORDER BY (raftSessionID, bucketName, insertedAt, timestamp, req_id);
+PARTITION BY toStartOfInterval(insertedAt, INTERVAL 1 HOUR)
+ORDER BY (raftSessionID, bucketName, insertedAt, startTime, req_id);
