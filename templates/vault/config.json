@@ -7,7 +7,7 @@
         "S3": {
             "address": "0.0.0.0",
             "port": 8500,
-            "allowFrom": ["0.0.0.0/8", "::1"]
+            "allowFrom": ["0.0.0.0/0", "::1"]
         },
         "administration": {
             "address": "0.0.0.0",
