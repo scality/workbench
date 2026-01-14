@@ -26,7 +26,7 @@ features:
     enabled: false
 
 cloudserver:
-  image: ghcr.io/scality/cloudserver:9.2.13
+  image: ghcr.io/scality/cloudserver:9.2.14
 
 vault:
   image: ghcr.io/scality/vault:7.83.0
