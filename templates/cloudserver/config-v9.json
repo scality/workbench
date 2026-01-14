@@ -65,7 +65,7 @@
     },
     "clusters": 1,
     "log": {
-        "logLevel": "info",
+        "logLevel": "{{ .Cloudserver.LogLevel }}",
         "dumpLevel": "error"
     },
     "healthChecks": {

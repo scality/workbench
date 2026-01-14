@@ -216,7 +216,7 @@
         }
     },
     "log": {
-        "logLevel": "trace",
+        "logLevel": "{{ .Backbeat.LogLevel }}",
         "dumpLevel": "error"
     },
     "metrics": {

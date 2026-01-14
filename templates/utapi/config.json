@@ -5,7 +5,7 @@
         "allowFrom": ["127.0.0.1/8", "::1"]
     },
     "log": {
-        "logLevel": "info",
+        "logLevel": "{{ .Utapi.LogLevel }}",
         "dumpLevel": "error"
     },
     "redis": {
