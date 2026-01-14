@@ -2,7 +2,6 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS logs.access_logs_ingest_mv
 TO logs.access_logs_federated
 AS
 SELECT
-    timestamp,
     insertedAt,
     hostname,
 
