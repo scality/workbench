@@ -142,8 +142,9 @@ func copyFile(src, dest string) (err error) {
 }
 
 // detectCloudserverVersion extracts the major version from a cloudserver image tag.
-// Returns "v7" for version 7.x images, "v9" for version 9+ images
-// Defaults to "v9" for non-numeric tags (latest, dev, etc.) or when version cannot be determined.
+// Returns "v7" for version 7.x images (e.g., 7.70.77), "v9" for version 9+ images.
+// Only recognizes semver-style tags (digits followed by a dot). Git SHAs and other
+// non-semver tags default to "v9".
 func detectCloudserverVersion(image string) string {
 	parts := strings.Split(image, ":")
 	if len(parts) < 2 || parts[1] == "" {
@@ -159,7 +160,9 @@ func detectCloudserverVersion(image string) string {
 			endIdx++
 		}
 
-		if endIdx > 0 {
+		// Must have a dot after the major version to be considered semver
+		// This prevents git SHAs like "7aae6b6..." from being detected as v7
+		if endIdx > 0 && endIdx < len(tag) && tag[endIdx] == '.' {
 			majorVersionStr := tag[0:endIdx]
 			if majorVersion, err := strconv.Atoi(majorVersionStr); err == nil {
 				if majorVersion == 7 {
@@ -172,6 +175,6 @@ func detectCloudserverVersion(image string) string {
 		}
 	}
 
-	// Default to v9 for non-numeric tags (latest, dev, etc.)
+	// Default to v9 for non-semver tags (latest, dev, git SHAs, etc.)
 	return "v9"
 }
