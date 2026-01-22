@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS logs.offsets
     bucketName                String,
     raftSessionID             UInt16,
     lastProcessedInsertedAt   DateTime,
-    lastProcessedStartTime    DateTime64(3),
+    lastProcessedStartTime    Int64,
     lastProcessedReqId        String
 )
 ENGINE = ReplacingMergeTree(lastProcessedInsertedAt)
