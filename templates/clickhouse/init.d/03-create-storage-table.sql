@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS logs.access_logs
     hostname               LowCardinality(Nullable(String)),
 
     -- AWS access server logs fields https://docs.aws.amazon.com/AmazonS3/latest/userguide/LogFormat.html
-    startTime              Int64, -- AWS "Time" field (epoch milliseconds)
+    startTime              DateTime64(3), -- AWS "Time" field
     requester              Nullable(String),
     operation              Nullable(String),
     requestURI             Nullable(String),
