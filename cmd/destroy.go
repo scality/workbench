@@ -30,10 +30,6 @@ func (c *DestroyCmd) Run() error {
 		return fmt.Errorf("failed to stat environment: %w", err)
 	}
 
-	if err := os.RemoveAll(envPath); err != nil {
-		return fmt.Errorf("failed to remove environment: %w", err)
-	}
-
 	cfgPath := filepath.Join(envPath, "values.yaml")
 	cfg, err := LoadEnvironmentConfig(cfgPath)
 	if err != nil {
@@ -58,6 +54,10 @@ func (c *DestroyCmd) Run() error {
 			return nil
 		}
 		return err
+	}
+
+	if err := os.RemoveAll(envPath); err != nil {
+		return fmt.Errorf("failed to remove environment: %w", err)
 	}
 
 	return nil
