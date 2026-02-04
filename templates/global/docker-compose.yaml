@@ -10,7 +10,6 @@ services:
 
   metadata-s3:
     image: ${METADATA_S3_IMAGE}
-    container_name: workbench-metadata-s3
     network_mode: host
     healthcheck:
       test: ["CMD-SHELL", "curl -o /dev/null http://127.0.0.1:9000/_/healthcheck"]
@@ -25,7 +24,6 @@ services:
 
   metadata-scuba:
     image: ${METADATA_SCUBA_IMAGE}
-    container_name: workbench-metadata-scuba
     network_mode: host
     healthcheck:
       test: ["CMD-SHELL", "curl -o /dev/null http://127.0.0.1:19000/_/healthcheck"]
@@ -40,7 +38,6 @@ services:
 
   s3-data:
     image: ${CLOUDSERVER_IMAGE}
-    container_name: workbench-s3-data
     network_mode: host
     command: node dataserver.js
     volumes:
@@ -51,7 +48,6 @@ services:
 
   cloudserver:
     image: ${CLOUDSERVER_IMAGE}
-    container_name: workbench-s3
     network_mode: host
     command: node index.js
     environment:
@@ -72,7 +68,6 @@ services:
 
   fluentbit:
     image: ${FLUENTBIT_IMAGE}
-    container_name: workbench-fluentbit
     network_mode: host
     depends_on:
       clickhouse-shard-1:
@@ -90,7 +85,6 @@ services:
 
   vault:
     image: ${VAULT_IMAGE}
-    container_name: workbench-vault
     network_mode: host
     command: sh -c "chmod 400 tests/utils/keyfile && yarn start"
     environment:
@@ -112,7 +106,6 @@ services:
       dockerfile: Dockerfile.setup
       args:
         BASE_IMAGE: ${VAULT_IMAGE}
-    container_name: workbench-setup-vault
     network_mode: host
     volumes:
       - ./config/vault/management-creds.json:/conf/management-creds.json:ro
@@ -124,7 +117,6 @@ services:
 
   scuba:
     image: ${SCUBA_IMAGE}
-    container_name: workbench-scuba
     restart: on-failure
     network_mode: host
     depends_on:
@@ -152,7 +144,6 @@ services:
       dockerfile: Dockerfile.setup
       args:
         BASE_IMAGE: ${SCUBA_IMAGE}
-    container_name: workbench-setup-scuba
     network_mode: host
     depends_on:
       setup-vault:
@@ -164,7 +155,6 @@ services:
 
   backbeat:
     image: ${BACKBEAT_IMAGE}
-    container_name: workbench-backbeat
     network_mode: host
     environment:
       SUPERVISORD_CONF: supervisord.conf
@@ -181,7 +171,6 @@ services:
 
   redis:
     image: ${REDIS_IMAGE}
-    container_name: workbench-redis
     network_mode: host
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
@@ -199,7 +188,6 @@ services:
     build:
       context: ./config/kafka
     restart: on-failure
-    container_name: workbench-zookeeper
     network_mode: host
     command: /opt/kafka/bin/zookeeper-server-start.sh /opt/kafka/config/zookeeper.properties
     environment:
@@ -215,7 +203,6 @@ services:
     build:
       context: ./config/kafka
     restart: on-failure
-    container_name: workbench-kafka
     network_mode: host
     command: /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties
     volumes:
@@ -228,7 +215,6 @@ services:
   setup-kafka:
     build:
       context: ./config/kafka
-    container_name: workbench-setup-kafka
     command: /usr/local/bin/setup-kafka.sh
     network_mode: host
     environment:
@@ -255,7 +241,6 @@ services:
     build:
       context: ./config/kafka
     restart: on-failure
-    container_name: workbench-kafka-destination
     network_mode: host
     command: /opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties
     profiles:
@@ -268,7 +253,6 @@ services:
   setup-kafka-destination:
     build:
       context: ./config/kafka
-    container_name: workbench-setup-kafka-destination
     environment:
       TOPICS_TO_CREATE: notifications
       KAFKA_PORT: '9094'
@@ -284,7 +268,6 @@ services:
     profiles:
       - feature-utapi
     image: ${UTAPI_IMAGE}
-    container_name: workbench-utapi
     network_mode: host
     command: ["bash", "-c", "yarn start"]
     volumes:
@@ -294,7 +277,6 @@ services:
 
   migration-tools:
     image: ${MIGRATION_TOOLS_IMAGE}
-    container_name: workbench-migration-tools
     network_mode: host
     depends_on:
       metadata-s3:
@@ -318,7 +300,6 @@ services:
       dockerfile: Dockerfile.shard
       args:
         BASE_IMAGE: ${CLICKHOUSE_IMAGE}
-    container_name: workbench-clickhouse-shard-1
     hostname: clickhouse-shard-1
     network_mode: host
     environment:
@@ -344,7 +325,6 @@ services:
       dockerfile: Dockerfile.shard
       args:
         BASE_IMAGE: ${CLICKHOUSE_IMAGE}
-    container_name: workbench-clickhouse-shard-2
     hostname: clickhouse-shard-2
     network_mode: host
     environment:
@@ -370,7 +350,6 @@ services:
       dockerfile: Dockerfile.setup
       args:
         BASE_IMAGE: ${CLICKHOUSE_IMAGE}
-    container_name: workbench-setup-clickhouse
     network_mode: host
     depends_on:
       clickhouse-shard-1:

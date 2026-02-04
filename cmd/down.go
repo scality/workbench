@@ -44,7 +44,7 @@ func (c *DownCmd) Run() error {
 		args = append(args, "--volumes")
 	}
 
-	dockerComposeCmd := buildDockerComposeCommand(cfg, args...)
+	dockerComposeCmd := buildDockerComposeCommand(rc.EnvName, cfg, args...)
 
 	fmt.Println(strings.Join(dockerComposeCmd, " "))
 

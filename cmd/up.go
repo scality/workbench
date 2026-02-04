@@ -59,7 +59,7 @@ func (c *UpCmd) Run() error {
 		args = append(args, "--no-cache")
 	}
 
-	dockerComposeCmd := buildDockerComposeCommand(cfg, args...)
+	dockerComposeCmd := buildDockerComposeCommand(rc.EnvName, cfg, args...)
 
 	log.Info().Str("command", strings.Join(dockerComposeCmd, " ")).Msg("Starting environment")
 

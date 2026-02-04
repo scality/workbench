@@ -95,14 +95,13 @@ func getComposeProfiles(cfg EnvironmentConfig) []string {
 	return profiles
 }
 
-func buildDockerComposeCommand(cfg EnvironmentConfig, args ...string) []string {
+func buildDockerComposeCommand(envName string, cfg EnvironmentConfig, args ...string) []string {
 	profiles := getComposeProfiles(cfg)
 
 	dockerComposeCmd := []string{
-		"docker",
-		"compose",
-		"--env-file",
-		"defaults.env",
+		"docker", "compose",
+		"--project-name", "workbench-" + envName,
+		"--env-file", "defaults.env",
 	}
 
 	for _, profile := range profiles {

@@ -38,7 +38,7 @@ func (c *DestroyCmd) Run() error {
 
 	args := []string{"down", "--volumes", "--timeout", fmt.Sprintf("%d", c.Timeout)}
 
-	dockerComposeCmd := buildDockerComposeCommand(cfg, args...)
+	dockerComposeCmd := buildDockerComposeCommand(rc.EnvName, cfg, args...)
 
 	fmt.Println(strings.Join(dockerComposeCmd, " "))
 
