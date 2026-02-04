@@ -53,6 +53,9 @@ services:
     image: ${CLOUDSERVER_IMAGE}
     container_name: workbench-s3
     network_mode: host
+    depends_on:
+      setup-cloudserver:
+        condition: service_completed_successfully
     command: node index.js
     environment:
       S3DATA: file
@@ -67,6 +70,23 @@ services:
       - ./config/cloudserver/config.json:/conf/config.json:ro
       - ./config/cloudserver/locationConfig.json:/conf/locationConfig.json:ro
       - ./logs/cloudserver:/logs:rw
+    profiles:
+      - base
+
+  setup-cloudserver:
+    build:
+      context: ./config/cloudserver
+      dockerfile: Dockerfile.setup
+      args:
+        # reuse scuba image since cloudserver does not contain the create-service-user script
+        BASE_IMAGE: ${SCUBA_IMAGE}
+    container_name: workbench-setup-cloudserver
+    network_mode: host
+    depends_on:
+      setup-vault:
+        condition: service_completed_successfully
+    volumes:
+      - ./config/vault/:/secrets
     profiles:
       - base
 
@@ -211,6 +231,7 @@ services:
       - feature-utapi
       - feature-migration
       - feature-lifecycle
+      - feature-rate-limiting
 
   zookeeper:
     build:

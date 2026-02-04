@@ -130,12 +130,13 @@ func generateCloudserverConfig(cfg EnvironmentConfig, path string) error {
 		return err
 	}
 
-	return renderTemplateToFile(
-		getTemplates(),
-		"templates/cloudserver/locationConfig.json",
-		cfg,
-		filepath.Join(path, "cloudserver", "locationConfig.json"),
-	)
+	templates := []string{
+		"locationConfig.json",
+		"create-service-user.sh",
+		"Dockerfile.setup",
+	}
+
+	return renderTemplates(cfg, "templates/cloudserver", filepath.Join(path, "cloudserver"), templates)
 }
 
 func generateBackbeatConfig(cfg EnvironmentConfig, path string) error {
