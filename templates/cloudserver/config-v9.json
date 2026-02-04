@@ -188,5 +188,37 @@
         "retryReopenDelayMS": 1000,
         "checkFileRotationIntervalMS": 10000
     },
+    "rateLimiting": {
+        "enabled": {{ .Features.RateLimiting.Enabled }},
+        "serviceUserArn": "arn:aws:iam::000000000000:user/scality-internal/service-rate-limit-user",
+        "nodes": 1,
+        "bucket": {
+            {{- if .Features.RateLimiting.Bucket.RequestsPerSecond }}
+            "defaultConfig": {
+                "requestsPerSecond": {
+                    "limit": {{ .Features.RateLimiting.Bucket.RequestsPerSecond.Limit }},
+                    "burstCapacity": {{ .Features.RateLimiting.Bucket.RequestsPerSecond.BurstCapacity }}
+                }
+            },
+            {{- end }}
+            "configCacheTTL": 30000
+        },
+        "account": {
+            {{- if .Features.RateLimiting.Account.RequestsPerSecond }}
+            "defaultConfig": {
+                "requestsPerSecond": {
+                    "limit": {{ .Features.RateLimiting.Account.RequestsPerSecond.Limit }},
+                    "burstCapacity": {{ .Features.RateLimiting.Account.RequestsPerSecond.BurstCapacity }}
+                }
+            },
+            {{- end }}
+            "configCacheTTL": 30000
+        },
+        "error": {
+            "statusCode": {{ .Features.RateLimiting.Error.StatusCode }},
+            "code": "{{ .Features.RateLimiting.Error.Code }}",
+            "message": "{{ .Features.RateLimiting.Error.Message }}"
+        }
+    },
     "testingMode": true
 }

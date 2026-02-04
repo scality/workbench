@@ -66,12 +66,13 @@ type GlobalConfig struct {
 }
 
 type FeatureConfig struct {
-	Scuba                  ScubaFeatureConfig               `yaml:"scuba"`
-	BucketNotifications    BucketNotificationsFeatureConfig `yaml:"bucket_notifications"`
+	Scuba                  ScubaFeatureConfig                  `yaml:"scuba"`
+	BucketNotifications    BucketNotificationsFeatureConfig    `yaml:"bucket_notifications"`
 	CrossRegionReplication CrossRegionReplicationFeatureConfig `yaml:"cross_region_replication"`
-	Utapi                  UtapiFeatureConfig               `yaml:"utapi"`
-	Migration              MigrationFeatureConfig           `yaml:"migration"`
-	AccessLogging          AccessLoggingFeatureConfig       `yaml:"access_logging"`
+	Utapi                  UtapiFeatureConfig                  `yaml:"utapi"`
+	Migration              MigrationFeatureConfig              `yaml:"migration"`
+	AccessLogging          AccessLoggingFeatureConfig          `yaml:"access_logging"`
+	RateLimiting           RateLimitingFeatureConfig           `yaml:"rate_limiting"`
 }
 
 type ScubaFeatureConfig struct {
@@ -228,6 +229,29 @@ type AccessLoggingFeatureConfig struct {
 	Enabled bool `yaml:"enabled"`
 }
 
+type RateLimitingFeatureConfig struct {
+	Enabled bool                      `yaml:"enabled"`
+	Bucket  RateLimitingDefaultLimits `yaml:"bucket"`
+	Account RateLimitingDefaultLimits `yaml:"account"`
+	Error   RateLimitingErrorConfig   `yaml:"error"`
+}
+
+type RateLimitingDefaultLimits struct {
+	RequestsPerSecond *RateLimitingLimitConfig `yaml:"requests_per_second"`
+	ConfigCacheTTL    int                      `yaml:"config_cache_ttl"`
+}
+
+type RateLimitingLimitConfig struct {
+	Limit         int `yaml:"limit"`
+	BurstCapacity int `yaml:"burst_capacity"`
+}
+
+type RateLimitingErrorConfig struct {
+	StatusCode int    `yaml:"status_code"`
+	Code       string `yaml:"code"`
+	Message    string `yaml:"message"`
+}
+
 func DefaultEnvironmentConfig() EnvironmentConfig {
 	return EnvironmentConfig{
 		Global: GlobalConfig{
@@ -254,6 +278,19 @@ func DefaultEnvironmentConfig() EnvironmentConfig {
 			},
 			AccessLogging: AccessLoggingFeatureConfig{
 				Enabled: false,
+			},
+			RateLimiting: RateLimitingFeatureConfig{
+				Bucket: RateLimitingDefaultLimits{
+					ConfigCacheTTL: 30000,
+				},
+				Account: RateLimitingDefaultLimits{
+					ConfigCacheTTL: 30000,
+				},
+				Error: RateLimitingErrorConfig{
+					StatusCode: 429,
+					Code:       "Slow Down",
+					Message:    "Rate limit exceeded. Please try again later.",
+				},
 			},
 		},
 		Cloudserver: CloudserverConfig{},
