@@ -59,6 +59,7 @@ type EnvironmentConfig struct {
 	MigrationTools MigrationToolsConfig `yaml:"migration_tools"`
 	Clickhouse     ClickhouseConfig     `yaml:"clickhouse"`
 	Fluentbit      FluentbitConfig      `yaml:"fluentbit"`
+	Nginx          NginxConfig          `yaml:"nginx"`
 }
 
 type GlobalConfig struct {
@@ -72,6 +73,11 @@ type FeatureConfig struct {
 	Utapi                  UtapiFeatureConfig               `yaml:"utapi"`
 	Migration              MigrationFeatureConfig           `yaml:"migration"`
 	AccessLogging          AccessLoggingFeatureConfig       `yaml:"access_logging"`
+	S3Frontend             S3FrontendFeatureConfig          `yaml:"s3_frontend"`
+}
+
+type S3FrontendFeatureConfig struct {
+	Enabled bool `yaml:"enabled"`
 }
 
 type ScubaFeatureConfig struct {
@@ -228,6 +234,12 @@ type AccessLoggingFeatureConfig struct {
 	Enabled bool `yaml:"enabled"`
 }
 
+type NginxConfig struct {
+	Image    string `yaml:"image"`
+	HTTPPort uint16 `yaml:"http_port"`
+	SSLPort  uint16 `yaml:"ssl_port"`
+}
+
 func DefaultEnvironmentConfig() EnvironmentConfig {
 	return EnvironmentConfig{
 		Global: GlobalConfig{
@@ -290,6 +302,10 @@ func DefaultEnvironmentConfig() EnvironmentConfig {
 		MigrationTools: MigrationToolsConfig{},
 		Clickhouse:     ClickhouseConfig{},
 		Fluentbit:      FluentbitConfig{},
+		Nginx: NginxConfig{
+			HTTPPort: 80,
+			SSLPort:  443,
+		},
 	}
 }
 

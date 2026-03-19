@@ -1,9 +1,17 @@
 package main
 
 import (
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/pem"
 	"fmt"
+	"math/big"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/rs/zerolog/log"
 )
@@ -77,6 +85,7 @@ func configureEnv(cfg EnvironmentConfig, envDir string) error {
 		generateMigrationToolsConfig,
 		generateClickhouseConfig,
 		generateFluentbitConfig,
+		generateNginxConfig,
 	}
 
 	configDir := filepath.Join(envDir, "config")
@@ -233,4 +242,93 @@ func generateFluentbitConfig(cfg EnvironmentConfig, path string) error {
 	}
 
 	return renderTemplates(cfg, "templates/fluentbit", filepath.Join(path, "fluentbit"), templates)
+}
+
+func generateNginxConfig(cfg EnvironmentConfig, path string) error {
+	if !cfg.Features.S3Frontend.Enabled {
+		return nil
+	}
+
+	nginxDir := filepath.Join(path, "nginx")
+
+	if err := renderTemplateToFile(
+		getTemplates(),
+		"templates/nginx/nginx.conf",
+		cfg,
+		filepath.Join(nginxDir, "nginx.conf"),
+	); err != nil {
+		return err
+	}
+
+	return generateTLSCertificate(nginxDir, "s3-frontend.key", "s3-frontend.crt")
+}
+
+// generateTLSCertificate creates a self-signed TLS certificate and key pair.
+func generateTLSCertificate(dir, keyName, certName string) error {
+	keyPath := filepath.Join(dir, keyName)
+	certPath := filepath.Join(dir, certName)
+
+	// Skip if both files already exist
+	_, keyErr := os.Stat(keyPath)
+	_, certErr := os.Stat(certPath)
+	if keyErr == nil && certErr == nil {
+		log.Debug().Str("dir", dir).Msg("TLS certificate already exists, skipping generation")
+		return nil
+	}
+
+	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		return fmt.Errorf("failed to generate TLS key: %w", err)
+	}
+
+	serialNumber, err := rand.Int(rand.Reader, new(big.Int).Lsh(big.NewInt(1), 128))
+	if err != nil {
+		return fmt.Errorf("failed to generate serial number: %w", err)
+	}
+
+	template := x509.Certificate{
+		SerialNumber: serialNumber,
+		Subject: pkix.Name{
+			Organization: []string{"Scality Workbench"},
+		},
+		DNSNames:              []string{"localhost", "s3.docker.test"},
+		NotBefore:             time.Now(),
+		NotAfter:              time.Now().Add(10 * 365 * 24 * time.Hour),
+		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		BasicConstraintsValid: true,
+	}
+
+	certDER, err := x509.CreateCertificate(rand.Reader, &template, &template, &key.PublicKey, key)
+	if err != nil {
+		return fmt.Errorf("failed to create TLS certificate: %w", err)
+	}
+
+	certFile, err := os.Create(certPath)
+	if err != nil {
+		return fmt.Errorf("failed to create cert file: %w", err)
+	}
+	defer func() { _ = certFile.Close() }()
+
+	if err := pem.Encode(certFile, &pem.Block{Type: "CERTIFICATE", Bytes: certDER}); err != nil {
+		return fmt.Errorf("failed to write TLS certificate: %w", err)
+	}
+
+	keyDER, err := x509.MarshalECPrivateKey(key)
+	if err != nil {
+		return fmt.Errorf("failed to marshal TLS key: %w", err)
+	}
+
+	keyFile, err := os.OpenFile(keyPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	if err != nil {
+		return fmt.Errorf("failed to create key file: %w", err)
+	}
+	defer func() { _ = keyFile.Close() }()
+
+	if err := pem.Encode(keyFile, &pem.Block{Type: "EC PRIVATE KEY", Bytes: keyDER}); err != nil {
+		return fmt.Errorf("failed to write TLS key: %w", err)
+	}
+
+	log.Info().Str("dir", dir).Msg("Generated self-signed TLS certificate")
+	return nil
 }

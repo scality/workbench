@@ -70,6 +70,17 @@ services:
     profiles:
       - base
 
+  s3-frontend:
+    image: ${NGINX_IMAGE}
+    container_name: workbench-s3-frontend
+    network_mode: host
+    volumes:
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./config/nginx/s3-frontend.crt:/certs/s3-frontend.crt:ro
+      - ./config/nginx/s3-frontend.key:/certs/s3-frontend.key:ro
+    profiles:
+      - feature-s3-frontend
+
   fluentbit:
     image: ${FLUENTBIT_IMAGE}
     container_name: workbench-fluentbit

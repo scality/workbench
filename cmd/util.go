@@ -92,6 +92,10 @@ func getComposeProfiles(cfg EnvironmentConfig) []string {
 		profiles = append(profiles, "feature-access-logging")
 	}
 
+	if cfg.Features.S3Frontend.Enabled {
+		profiles = append(profiles, "feature-s3-frontend")
+	}
+
 	return profiles
 }
 
