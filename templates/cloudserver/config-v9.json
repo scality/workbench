@@ -125,9 +125,16 @@
         }
     },
     "requests": {
+        {{- if .Features.S3Frontend.Enabled }}
+        "viaProxy": true,
+        "trustedProxyCIDRs": ["127.0.0.1/8"],
+        "extractClientIPFromHeader": "x-forwarded-for",
+        "extractProtocolFromHeader": "x-forwarded-proto"
+        {{- else }}
         "viaProxy": false,
         "trustedProxyCIDRs": [],
         "extractClientIPFromHeader": ""
+        {{- end }}
     },
     {{ if .Features.BucketNotifications.Enabled }}
     "bucketNotificationDestinations": [
