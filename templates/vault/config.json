@@ -83,6 +83,38 @@
                     ]
                 }
             }
+        },
+        {
+            "role": {
+                "roleName": "lifecycle-role",
+                "trustPolicy": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "AWS": "arn:aws:iam::000000000000:user/lifecycle"
+                            },
+                            "Action": "sts:AssumeRole",
+                            "Condition": {}
+                        }
+                    ]
+                }
+            },
+            "permissionPolicy": {
+                "policyName": "lifecycle-policy",
+                "policyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "LifecycleFullAccess",
+                            "Effect": "Allow",
+                            "Action": ["s3:*"],
+                            "Resource": ["*"]
+                        }
+                    ]
+                }
+            }
         }
     ],
     "utapi": {

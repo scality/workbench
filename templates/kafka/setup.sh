@@ -64,6 +64,9 @@ create /queue-populator/raft-id-dispatcher/provisions
 create /queue-populator/raft-id-dispatcher/provisions/0
 create /queue-populator/raft-id-dispatcher/provisions/1
 create /queue-populator/raft-id-dispatcher/provisions/2
+create /lifecycle
+create /lifecycle/conductor
+create /lifecycle/conductor/election
 quit
 EOF
     echo "[setup] Zookeeper paths created."

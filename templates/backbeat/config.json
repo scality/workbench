@@ -153,7 +153,7 @@
         "lifecycle": {
             "auth": {
                 "type": "assumeRole",
-                "roleName": "lifecycle-role",
+                "roleName": "scality-internal/lifecycle-role",
                 "sts": {
                     "host": "127.0.0.1",
                     "port": 8800,
@@ -169,9 +169,21 @@
             "bucketTasksTopic": "backbeat-lifecycle-bucket-tasks",
             "objectTasksTopic": "backbeat-lifecycle-object-tasks",
             "conductor": {
+                "auth": {
+                    "type": "none",
+                    "vault": {
+                        "host": "127.0.0.1",
+                        "port": 8500
+                    }
+                },
                 "backlogControl": { "enabled": true },
                 "cronRule": "*/5 * * * * *",
                 "concurrency": 10,
+                "bucketSource": "bucketd",
+                "bucketd": {
+                    "host": "127.0.0.1",
+                    "port": 9000
+                },
                 "probeServer": {
                     "bindAddress": "0.0.0.0",
                     "port": 8552

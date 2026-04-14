@@ -127,6 +127,7 @@ services:
     network_mode: host
     volumes:
       - ./config/vault/management-creds.json:/conf/management-creds.json:ro
+      - ./config/backbeat:/conf/backbeat:rw
     depends_on:
       vault:
         condition: service_healthy
@@ -177,6 +178,9 @@ services:
     image: ${BACKBEAT_IMAGE}
     container_name: workbench-backbeat
     network_mode: host
+    depends_on:
+      setup-vault:
+        condition: service_completed_successfully
     environment:
       SUPERVISORD_CONF: supervisord.conf
       BACKBEAT_CONFIG_FILE: /conf/config.json
@@ -189,6 +193,7 @@ services:
     profiles:
       - feature-crr
       - feature-notifications
+      - feature-lifecycle
 
   redis:
     image: ${REDIS_IMAGE}
@@ -205,6 +210,7 @@ services:
       - feature-notifications
       - feature-utapi
       - feature-migration
+      - feature-lifecycle
 
   zookeeper:
     build:
@@ -221,6 +227,7 @@ services:
     profiles:
       - feature-crr
       - feature-notifications
+      - feature-lifecycle
 
   kafka:
     build:
@@ -235,6 +242,7 @@ services:
     profiles:
       - feature-crr
       - feature-notifications
+      - feature-lifecycle
 
   setup-kafka:
     build:
@@ -261,6 +269,7 @@ services:
     profiles:
       - feature-crr
       - feature-notifications
+      - feature-lifecycle
 
   kafka-destination:
     build:

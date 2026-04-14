@@ -74,6 +74,7 @@ type FeatureConfig struct {
 	Migration              MigrationFeatureConfig           `yaml:"migration"`
 	AccessLogging          AccessLoggingFeatureConfig       `yaml:"access_logging"`
 	S3Frontend             S3FrontendFeatureConfig          `yaml:"s3_frontend"`
+	Lifecycle              LifecycleFeatureConfig           `yaml:"lifecycle"`
 }
 
 type S3FrontendFeatureConfig struct {
@@ -240,6 +241,10 @@ type NginxConfig struct {
 	SSLPort  uint16 `yaml:"ssl_port"`
 }
 
+type LifecycleFeatureConfig struct {
+	Enabled bool `yaml:"enabled"`
+}
+
 func DefaultEnvironmentConfig() EnvironmentConfig {
 	return EnvironmentConfig{
 		Global: GlobalConfig{
@@ -265,6 +270,9 @@ func DefaultEnvironmentConfig() EnvironmentConfig {
 				Enabled: false,
 			},
 			AccessLogging: AccessLoggingFeatureConfig{
+				Enabled: false,
+			},
+			Lifecycle: LifecycleFeatureConfig{
 				Enabled: false,
 			},
 		},

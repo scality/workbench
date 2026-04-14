@@ -53,50 +53,174 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-echo "[setup] Management account and access key setup completed successfully 🎉"
+echo "[setup] Management account and access key setup completed successfully"
 
-# === Create acccess key for lifecycle service user ===
-# echo "[setup] Creating access key for lifecycle service user..."
-# LIFECYCLE_CREDS_JSON=$(jq '.extensions.lifecycle.auth.sts' /config/backbeat/config.json)
-# LEFECYCLE_ACCESS_KEY=$(echo "$LIFECYCLE_CREDS_JSON" | jq -r '.accessKey')
-# LIFECYCLE_SECRET_KEY=$(echo "$LIFECYCLE_CREDS_JSON" | jq -r '.secretKey')
+# === Create test data account ===
+# This account is seeded with the lifecycle role via vault's accountSeeds,
+# which allows backbeat to AssumeRole into it for lifecycle operations.
+TEST_ACCOUNT_ACCESS_KEY="WBTKACCESSI9O3YKIRQ0"
+TEST_ACCOUNT_SECRET_KEY="ICxmNTBbOqijy4rMq/MOP1EPlTMqfsEBLjROcAbN"
 
-# # === Generate management access key ===
-# echo "[setup] Generating management access key..."
-# MGMT_CREDS_JSON=$(./node_modules/vaultclient/bin/vaultclient generate-account-access-key --name management --host vault --port 8600)
+echo "[setup] Creating test data account..."
+resp=$(./node_modules/vaultclient/bin/vaultclient \
+        create-account \
+        --name testaccount \
+        --email testaccount@test.com \
+        --host 127.0.0.1 \
+        --port 8600 2>&1) || {
+  if echo "$resp" | grep -q "EntityAlreadyExists"; then
+    echo "[setup] Test data account already exists, skipping creation"
+  else
+    echo "[setup] Error creating test data account:"
+    echo "$resp"
+    exit 1
+  fi
+}
 
-# MANAGEMENT_ACCESS_KEY=$(echo "$MGMT_CREDS_JSON" | jq -r '.id')
-# MANAGEMENT_SECRET_KEY=$(echo "$MGMT_CREDS_JSON" | jq -r '.value')
+echo "[setup] Generating access key for test data account..."
+resp=$(./node_modules/vaultclient/bin/vaultclient \
+        generate-account-access-key \
+        --name testaccount \
+        --accesskey "$TEST_ACCOUNT_ACCESS_KEY" \
+        --secretkey "$TEST_ACCOUNT_SECRET_KEY" \
+        --host 127.0.0.1 \
+        --port 8600 2>&1) || {
+  if echo "$resp" | grep -q "EntityAlreadyExists"; then
+    echo "[setup] Test data account access key already exists, skipping"
+  else
+    echo "[setup] Error generating access key for test data account:"
+    echo "$resp"
+    exit 1
+  fi
+}
 
-# echo "[setup] Management credentials:"
-# echo "MANAGEMENT_ACCESS_KEY=$MANAGEMENT_ACCESS_KEY"
-# echo "MANAGEMENT_SECRET_KEY=$MANAGEMENT_SECRET_KEY"
-# echo
+echo "[setup] Test data account ready (accessKey=$TEST_ACCOUNT_ACCESS_KEY)"
 
-# # === Create lifecycle service user ===
-# echo "[setup] Creating lifecycle service user..."
-# SERVICE_CREDS_JSON=$(AWS_ACCESS_KEY_ID="$MANAGEMENT_ACCESS_KEY" \
-#                       AWS_SECRET_ACCESS_KEY="$MANAGEMENT_SECRET_KEY" \
-#                       AWS_REGION="$REGION" \
-#                       ./bin/ensureServiceUser apply lifecycle --iam-endpoint http://vault:8600)
+# === Create lifecycle service user ===
+BACKBEAT_CONFIG_FILE=/conf/backbeat/config.json
+IAM_ENDPOINT=http://127.0.0.1:8600
+export AWS_ACCESS_KEY_ID="$MANAGEMENT_ACCESS_KEY"
+export AWS_SECRET_ACCESS_KEY="$MANAGEMENT_SECRET_KEY"
+export AWS_DEFAULT_REGION="$REGION"
 
-# SERVICE_ACCESS_KEY=$(echo "$SERVICE_CREDS_JSON" | jq -r '.data.AccessKeyId')
-# SERVICE_SECRET_KEY=$(echo "$SERVICE_CREDS_JSON" | jq -r '.data.SecretAccessKey')
+if [ -f "$BACKBEAT_CONFIG_FILE" ]; then
+  echo "[setup] Creating lifecycle service user..."
+  resp=$(aws iam create-user \
+    --user-name lifecycle \
+    --endpoint-url "$IAM_ENDPOINT" 2>&1) || {
+    if echo "$resp" | grep -q "EntityAlreadyExists"; then
+      echo "[setup] Lifecycle user already exists, skipping creation"
+    else
+      echo "[setup] Error creating lifecycle user:"
+      echo "$resp"
+      exit 1
+    fi
+  }
 
-# echo "[setup] Lifecycle service user credentials:"
-# echo "SERVICE_ACCESS_KEY=$SERVICE_ACCESS_KEY"
-# echo "SERVICE_SECRET_KEY=$SERVICE_SECRET_KEY"
-# echo
+  echo "[setup] Generating lifecycle access key..."
+  LIFECYCLE_CREDS=$(aws iam create-access-key \
+    --user-name lifecycle \
+    --endpoint-url "$IAM_ENDPOINT" 2>&1) || {
+    if echo "$LIFECYCLE_CREDS" | grep -q "LimitExceeded\|EntityAlreadyExists"; then
+      echo "[setup] Lifecycle access key already exists, reading from backbeat config"
+      SERVICE_ACCESS_KEY=$(jq -r '.extensions.lifecycle.auth.sts.accessKey' "$BACKBEAT_CONFIG_FILE")
+      SERVICE_SECRET_KEY=$(jq -r '.extensions.lifecycle.auth.sts.secretKey' "$BACKBEAT_CONFIG_FILE")
+      LIFECYCLE_CREDS=""
+    else
+      echo "[setup] Error generating lifecycle access key:"
+      echo "$LIFECYCLE_CREDS"
+      exit 1
+    fi
+  }
 
-# # === Update backbeat-config.json ===
-# echo "[setup] Updating backbeat-config.json with service user credentials..."
-# jq --arg ak "$SERVICE_ACCESS_KEY" --arg sk "$SERVICE_SECRET_KEY" \
-#   '.extensions.lifecycle.auth.sts.accessKey = $ak | .extensions.lifecycle.auth.sts.secretKey = $sk' \
-#   "$CONFIG_FILE" > /tmp/backbeat-config.updated.json
+  if [ -n "$LIFECYCLE_CREDS" ]; then
+    SERVICE_ACCESS_KEY=$(echo "$LIFECYCLE_CREDS" | jq -r '.AccessKey.AccessKeyId')
+    SERVICE_SECRET_KEY=$(echo "$LIFECYCLE_CREDS" | jq -r '.AccessKey.SecretAccessKey')
+  fi
 
-# mv /tmp/backbeat-config.updated.json "$CONFIG_FILE"
-# echo "[setup] backbeat-config.json successfully updated!"
-# echo
+  echo "[setup] Lifecycle user created"
+  echo "[setup] SERVICE_ACCESS_KEY=$SERVICE_ACCESS_KEY"
 
-# # === Done ===
-# echo "[setup] Setup service users completed successfully 🎉"
+  # === Grant lifecycle user permission to assume roles ===
+  echo "[setup] Creating assume-role policy..."
+  ASSUME_POLICY='{"Version":"2012-10-17","Statement":{"Effect":"Allow","Action":"sts:AssumeRole","Resource":"*"}}'
+  resp=$(aws iam create-policy \
+    --policy-name lifecycle-assume-role \
+    --policy-document "$ASSUME_POLICY" \
+    --endpoint-url "$IAM_ENDPOINT" 2>&1) || {
+    if echo "$resp" | grep -q "EntityAlreadyExists"; then
+      echo "[setup] Assume-role policy already exists, skipping creation"
+    else
+      echo "[setup] Error creating assume-role policy:"
+      echo "$resp"
+      exit 1
+    fi
+  }
+
+  aws iam attach-user-policy \
+    --policy-arn "arn:aws:iam::000000000000:policy/lifecycle-assume-role" \
+    --user-name lifecycle \
+    --endpoint-url "$IAM_ENDPOINT"
+
+  if [ $? -ne 0 ]; then
+    echo "[setup] Error attaching assume-role policy to lifecycle user"
+    exit 1
+  fi
+  echo "[setup] Assume-role policy attached to lifecycle user"
+
+  # === Create lifecycle role in the internal services account ===
+  # Backbeat hardcodes account 000000000000 for AssumeRole (VAULT-238 workaround),
+  # and accountSeeds only apply to accounts created via the normal flow,
+  # so we must create the role explicitly in the internal services account.
+  echo "[setup] Creating lifecycle role in internal services account..."
+  TRUST_POLICY="{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"arn:aws:iam::000000000000:user/lifecycle\"},\"Action\":\"sts:AssumeRole\",\"Condition\":{}}]}"
+  resp=$(aws iam create-role \
+    --role-name lifecycle-role \
+    --path "/scality-internal/" \
+    --assume-role-policy-document "$TRUST_POLICY" \
+    --endpoint-url "$IAM_ENDPOINT" 2>&1) || {
+    if echo "$resp" | grep -q "EntityAlreadyExists"; then
+      echo "[setup] Lifecycle role already exists, skipping creation"
+    else
+      echo "[setup] Error creating lifecycle role:"
+      echo "$resp"
+      exit 1
+    fi
+  }
+
+  S3_FULL_ACCESS='{"Version":"2012-10-17","Statement":[{"Sid":"LifecycleFullAccess","Effect":"Allow","Action":["s3:*"],"Resource":["*"]}]}'
+  resp=$(aws iam create-policy \
+    --policy-name lifecycle-s3-access \
+    --policy-document "$S3_FULL_ACCESS" \
+    --endpoint-url "$IAM_ENDPOINT" 2>&1) || {
+    if echo "$resp" | grep -q "EntityAlreadyExists"; then
+      echo "[setup] Lifecycle S3 access policy already exists, skipping creation"
+    else
+      echo "[setup] Error creating lifecycle S3 access policy:"
+      echo "$resp"
+      exit 1
+    fi
+  }
+
+  aws iam attach-role-policy \
+    --role-name lifecycle-role \
+    --policy-arn "arn:aws:iam::000000000000:policy/lifecycle-s3-access" \
+    --endpoint-url "$IAM_ENDPOINT"
+
+  if [ $? -ne 0 ]; then
+    echo "[setup] Error setting up lifecycle role"
+    exit 1
+  fi
+  echo "[setup] Lifecycle role created in internal services account"
+
+  # === Update backbeat config.json with lifecycle credentials ===
+  echo "[setup] Updating backbeat config.json with lifecycle credentials..."
+  jq --arg ak "$SERVICE_ACCESS_KEY" --arg sk "$SERVICE_SECRET_KEY" \
+    '.extensions.lifecycle.auth.sts.accessKey = $ak | .extensions.lifecycle.auth.sts.secretKey = $sk' \
+    "$BACKBEAT_CONFIG_FILE" > /tmp/backbeat-config.updated.json
+
+  mv /tmp/backbeat-config.updated.json "$BACKBEAT_CONFIG_FILE"
+  echo "[setup] Backbeat config.json updated with lifecycle credentials"
+fi
+
+echo "[setup] Setup completed successfully"
