@@ -96,6 +96,10 @@ func getComposeProfiles(cfg EnvironmentConfig) []string {
 		profiles = append(profiles, "feature-s3-frontend")
 	}
 
+	if cfg.Features.Lifecycle.Enabled {
+		profiles = append(profiles, "feature-lifecycle")
+	}
+
 	return profiles
 }
 

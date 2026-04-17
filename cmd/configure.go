@@ -49,8 +49,6 @@ func createLogDirectories(envDir string) error {
 		filepath.Join(envDir, "logs", "scuba"),
 		filepath.Join(envDir, "logs", "backbeat"),
 		filepath.Join(envDir, "logs", "migration-tools"),
-		filepath.Join(envDir, "logs", "clickhouse-shard-1"),
-		filepath.Join(envDir, "logs", "clickhouse-shard-2"),
 		filepath.Join(envDir, "logs", "fluentbit"),
 	}
 
