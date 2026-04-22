@@ -46,6 +46,9 @@ if [[ "$CREATE_ZOOKEEPER_PATHS" == "true" ]]; then
     fi
 
     echo "[setup] Creating Zookeeper paths..."
+    # zookeeper-shell.sh exits non-zero when any 'create' returns NodeExists,
+    # which is the expected outcome on re-runs against a persisted volume.
+    set +e
     zookeeper-shell.sh localhost:2181/backbeat <<EOF
 create /
 create /bucket-notification
@@ -69,6 +72,7 @@ create /lifecycle/conductor
 create /lifecycle/conductor/election
 quit
 EOF
+    set -e
     echo "[setup] Zookeeper paths created."
     echo
 fi

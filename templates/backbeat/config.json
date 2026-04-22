@@ -21,6 +21,10 @@
         "host": "127.0.0.1",
         "port": 8500
     },
+    "redis": {
+        "host": "127.0.0.1",
+        "port": 6379
+    },
     "replicationGroupId": "RG001  ",
     "queuePopulator": {
         "cronRule": "*/5 * * * * *",
@@ -59,7 +63,7 @@
                         "host": "127.0.0.1",
                         "port": 8500,
                         "adminPort": 8600,
-                        "adminCredentialsFile": "/home/scality/backbeat/node_modules/vaultclient/tests/utils/admincredentials.json"
+                        "adminCredentialsFile": "/conf/admin-backbeat.json"
                     }
                 }
             },
@@ -74,7 +78,7 @@
                         "host": "127.0.0.1",
                         "port": 8500,
                         "adminPort": 8600,
-                        "adminCredentialsFile": "/home/scality/backbeat/node_modules/vaultclient/tests/utils/admincredentials.json"
+                        "adminCredentialsFile": "/conf/admin-backbeat.json"
                     }
                 }
             },
