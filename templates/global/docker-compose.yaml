@@ -125,6 +125,7 @@ services:
         BASE_IMAGE: ${VAULT_IMAGE}
     container_name: workbench-setup-vault
     network_mode: host
+    user: "${HOST_UID}:${HOST_GID}"
     volumes:
       - ./config/vault/management-creds.json:/conf/management-creds.json:ro
       - ./config/backbeat:/conf/backbeat:rw
@@ -166,6 +167,7 @@ services:
         BASE_IMAGE: ${SCUBA_IMAGE}
     container_name: workbench-setup-scuba
     network_mode: host
+    user: "${HOST_UID}:${HOST_GID}"
     depends_on:
       setup-vault:
         condition: service_completed_successfully
