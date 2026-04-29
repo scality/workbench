@@ -11,6 +11,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/Masterminds/sprig/v3"
 	"github.com/hashicorp/go-multierror"
 
 	"github.com/scality/workbench"
@@ -25,7 +26,7 @@ func getTemplates() fs.FS {
 }
 
 func templateFile(templates fs.FS, path string, data any) ([]byte, error) {
-	tmpl, err := template.ParseFS(templates, path)
+	tmpl, err := template.New("base").Funcs(sprig.FuncMap()).ParseFS(templates, path)
 	if err != nil {
 		return nil, err
 	}
@@ -98,6 +99,10 @@ func getComposeProfiles(cfg EnvironmentConfig) []string {
 
 	if cfg.Features.Lifecycle.Enabled {
 		profiles = append(profiles, "feature-lifecycle")
+	}
+
+	if cfg.Features.RateLimiting.Enabled {
+		profiles = append(profiles, "feature-rate-limiting")
 	}
 
 	return profiles
