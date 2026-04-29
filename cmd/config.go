@@ -60,6 +60,9 @@ type EnvironmentConfig struct {
 	Clickhouse     ClickhouseConfig     `yaml:"clickhouse"`
 	Fluentbit      FluentbitConfig      `yaml:"fluentbit"`
 	Nginx          NginxConfig          `yaml:"nginx"`
+
+	HostUID int `yaml:"-"`
+	HostGID int `yaml:"-"`
 }
 
 type GlobalConfig struct {
@@ -319,6 +322,8 @@ func DefaultEnvironmentConfig() EnvironmentConfig {
 
 func LoadEnvironmentConfig(path string) (EnvironmentConfig, error) {
 	cfg := DefaultEnvironmentConfig()
+	cfg.HostUID = os.Getuid()
+	cfg.HostGID = os.Getgid()
 
 	if path == "" {
 		return cfg, nil

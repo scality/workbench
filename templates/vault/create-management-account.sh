@@ -56,16 +56,20 @@ fi
 echo "[setup] Management account and access key setup completed successfully"
 
 # === Create test data account ===
-# This account is seeded with the lifecycle role via vault's accountSeeds,
-# which allows backbeat to AssumeRole into it for lifecycle operations.
+# This account is seeded with the lifecycle and replication roles via vault's
+# accountSeeds. We pin the account ID so downstream tooling (e.g. the
+# enable-crr.sh helper) can reference role ARNs in this account by a stable
+# value.
 TEST_ACCOUNT_ACCESS_KEY="WBTKACCESSI9O3YKIRQ0"
 TEST_ACCOUNT_SECRET_KEY="ICxmNTBbOqijy4rMq/MOP1EPlTMqfsEBLjROcAbN"
+TEST_ACCOUNT_ID="123456789012"
 
 echo "[setup] Creating test data account..."
 resp=$(./node_modules/vaultclient/bin/vaultclient \
         create-account \
         --name testaccount \
         --email testaccount@test.com \
+        --accountid "$TEST_ACCOUNT_ID" \
         --host 127.0.0.1 \
         --port 8600 2>&1) || {
   if echo "$resp" | grep -q "EntityAlreadyExists"; then
@@ -221,6 +225,7 @@ if [ -f "$BACKBEAT_CONFIG_FILE" ]; then
 
   mv /tmp/backbeat-config.updated.json "$BACKBEAT_CONFIG_FILE"
   echo "[setup] Backbeat config.json updated with lifecycle credentials"
+
 fi
 
 echo "[setup] Setup completed successfully"

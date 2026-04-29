@@ -125,6 +125,7 @@ services:
         BASE_IMAGE: ${VAULT_IMAGE}
     container_name: workbench-setup-vault
     network_mode: host
+    user: "${HOST_UID}:${HOST_GID}"
     volumes:
       - ./config/vault/management-creds.json:/conf/management-creds.json:ro
       - ./config/backbeat:/conf/backbeat:rw
@@ -166,6 +167,7 @@ services:
         BASE_IMAGE: ${SCUBA_IMAGE}
     container_name: workbench-setup-scuba
     network_mode: host
+    user: "${HOST_UID}:${HOST_GID}"
     depends_on:
       setup-vault:
         condition: service_completed_successfully
@@ -181,6 +183,8 @@ services:
     depends_on:
       setup-vault:
         condition: service_completed_successfully
+      setup-kafka:
+        condition: service_completed_successfully
     environment:
       SUPERVISORD_CONF: supervisord.conf
       BACKBEAT_CONFIG_FILE: /conf/config.json
@@ -188,6 +192,7 @@ services:
       - ./config/backbeat/supervisord.conf:/conf/supervisord.conf:ro
       - ./config/backbeat/config.json:/conf/config.json:ro
       - ./config/backbeat/config.notification.json:/conf/config.notification.json:ro
+      - ./config/backbeat/admin-backbeat.json:/conf/admin-backbeat.json:ro
       - ./config/backbeat/env:/conf/env:ro
       - ./logs/backbeat:/logs
     profiles:
@@ -260,7 +265,7 @@ services:
         backbeat-data-mover
         backbeat-replication-status
         backbeat-replication-failed
-        backbeat-metrics-group-crr
+        backbeat-metrics
       CREATE_ZOOKEEPER_PATHS: 'true'
       ZOOKEEPER_ENDPOINT: 127.0.0.1:2181/backbeat
     depends_on:
