@@ -1,0 +1,11 @@
+ARG BASE_IMAGE
+
+FROM $BASE_IMAGE
+
+USER root
+
+RUN apt-get update && apt-get install -y jq curl
+
+COPY --chmod=755 create-service-user.sh /opt/
+
+CMD ["/opt/create-service-user.sh"]

@@ -98,11 +98,13 @@
     {{ else }}
     "bucketNotificationDestinations": [],
     {{ end }}
-    {{ if .Features.Utapi.Enabled }}
+    {{ if or .Features.Utapi.Enabled .Features.RateLimiting.Enabled }}
     "localCache": {
         "host": "localhost",
         "port": 6379
     },
+    {{ end }}
+    {{ if .Features.Utapi.Enabled }}
     "utapi": {
         "host": "localhost",
         "port": 8100,
@@ -112,6 +114,40 @@
             "port": 6379
         }
     },
-    {{ end }}
+    {{- end }}
+    {{- if .Features.RateLimiting.Enabled }}
+    "rateLimiting": {
+        "enabled": {{ .Features.RateLimiting.Enabled }},
+        "serviceUserArn": "arn:aws:iam::000000000000:user/scality-internal/service-rate-limit-user",
+        "nodes": 1,
+        "bucket": {
+            {{- if .Features.RateLimiting.Bucket.RequestsPerSecond }}
+            "defaultConfig": {
+                "requestsPerSecond": {
+                    "limit": {{ .Features.RateLimiting.Bucket.RequestsPerSecond.Limit }},
+                    "burstCapacity": {{ .Features.RateLimiting.Bucket.RequestsPerSecond.BurstCapacity }}
+                }
+            },
+            {{- end }}
+            "configCacheTTL": {{ .Features.RateLimiting.Bucket.ConfigCacheTTL }}
+        },
+        "account": {
+            {{- if .Features.RateLimiting.Account.RequestsPerSecond }}
+            "defaultConfig": {
+                "requestsPerSecond": {
+                    "limit": {{ .Features.RateLimiting.Account.RequestsPerSecond.Limit }},
+                    "burstCapacity": {{ .Features.RateLimiting.Account.RequestsPerSecond.BurstCapacity }}
+                }
+            },
+            {{- end }}
+            "configCacheTTL": {{ .Features.RateLimiting.Account.ConfigCacheTTL }}
+        },
+        "error": {
+            "statusCode": {{ .Features.RateLimiting.Error.StatusCode }},
+            "code": {{ .Features.RateLimiting.Error.Code | toJson }},
+            "message": {{ .Features.RateLimiting.Error.Message | toJson }}
+        }
+    },
+    {{- end }}
     "testingMode": true
 }

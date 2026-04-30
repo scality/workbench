@@ -70,6 +70,23 @@ services:
     profiles:
       - base
 
+  setup-rate-limiting-svc-user:
+    build:
+      context: ./config/cloudserver
+      dockerfile: Dockerfile.setup
+      args:
+        # reuse scuba image since cloudserver does not contain the create-service-user script
+        BASE_IMAGE: ${SCUBA_IMAGE}
+    container_name: workbench-setup-cloudserver
+    network_mode: host
+    depends_on:
+      setup-vault:
+        condition: service_completed_successfully
+    volumes:
+      - ./config/vault/:/secrets
+    profiles:
+      - feature-rate-limiting
+
   s3-frontend:
     image: ${NGINX_IMAGE}
     container_name: workbench-s3-frontend
@@ -211,6 +228,7 @@ services:
       - feature-utapi
       - feature-migration
       - feature-lifecycle
+      - feature-rate-limiting
 
   zookeeper:
     build:
