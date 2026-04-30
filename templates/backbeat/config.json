@@ -180,7 +180,7 @@
                         "port": 8500
                     }
                 },
-                "backlogControl": { "enabled": true },
+                "backlogControl": { "enabled": false },
                 "cronRule": "*/5 * * * * *",
                 "concurrency": 10,
                 "bucketSource": "bucketd",
