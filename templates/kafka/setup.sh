@@ -64,9 +64,9 @@ create /queue-populator/raft-id-dispatcher
 create /queue-populator/raft-id-dispatcher/owners
 create /queue-populator/raft-id-dispatcher/leaders
 create /queue-populator/raft-id-dispatcher/provisions
-create /queue-populator/raft-id-dispatcher/provisions/0
 create /queue-populator/raft-id-dispatcher/provisions/1
 create /queue-populator/raft-id-dispatcher/provisions/2
+create /queue-populator/raft-id-dispatcher/provisions/3
 create /lifecycle
 create /lifecycle/conductor
 create /lifecycle/conductor/election
