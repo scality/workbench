@@ -185,6 +185,8 @@ services:
         condition: service_completed_successfully
       setup-kafka:
         condition: service_completed_successfully
+      redis:
+        condition: service_healthy
     environment:
       SUPERVISORD_CONF: supervisord.conf
       BACKBEAT_CONFIG_FILE: /conf/config.json
