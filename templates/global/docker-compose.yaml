@@ -120,7 +120,7 @@ services:
     image: ${VAULT_IMAGE}
     container_name: workbench-vault
     network_mode: host
-    command: sh -c "chmod 400 tests/utils/keyfile && yarn start"
+    command: sh -c "chmod 400 tests/utils/keyfile && node --max-http-header-size=32768 vaultd.js"
     environment:
       VAULT_DB_BACKEND: LEVELDB
     volumes:
