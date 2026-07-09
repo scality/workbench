@@ -53,10 +53,10 @@ scuba_metadata:
   image: ghcr.io/scality/metadata:9.1.0-standalone
 
 kafka:
-  image: bitnami/kafka:3.4.0
+  image: soldevelo/kafka:3.4.1
 
 zookeeper:
-  image: bitnami/zookeeper:3.9.3
+  image: soldevelo/zookeeper:3.9.5
 
 redis:
   image: redis:8
